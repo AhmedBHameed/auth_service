@@ -1,0 +1,6 @@
+{
+  "importSorter.generalConfiguration.sortOnBeforeSave": false,
+  "importSorter.importStringConfiguration.spacingPerImportExpression.afterStartingBracket": 0,
+  "importSorter.importStringConfiguration.spacingPerImportExpression.beforeEndingBracket": 0,
+  "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.type": 120
+}
