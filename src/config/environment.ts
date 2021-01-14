@@ -13,12 +13,13 @@ const {
   LOG_LEVEL,
   NODE_ENV,
   SECRET,
+  VERSION,
 } = process.env;
 
 const serverHost = isDockerized() ? MONGODB_SERVER : MONGODB_SERVER_NO_CONTAINER;
 
 export default {
-  version: '2.0.0',
+  version: VERSION,
   isProd: NODE_ENV === 'production',
   database: {
     dbName: MONGODB_DB || '',

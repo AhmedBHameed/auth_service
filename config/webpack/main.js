@@ -22,6 +22,7 @@ const {
   MONGODB_SERVER_NO_CONTAINER,
   MONGODB_PORT,
   MONGODB_DB,
+  VERSION
 } = process.env;
 
 const config = () => {
@@ -37,6 +38,7 @@ const config = () => {
         MONGODB_SERVER_NO_CONTAINER,
         MONGODB_PORT,
         MONGODB_DB,
+        VERSION
       }
     : dotenv.config({path: `${ROOT_DIR}/.${NODE_ENV}.env`}).parsed;
 
