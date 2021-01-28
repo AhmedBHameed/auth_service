@@ -10,45 +10,7 @@
     "avatar": "",
     "status": "ACTIVE",
     "gender": "male",
-    "roles": ["IED_ADMIN"],
-    "verificationId": "01EGXMD8378F5TZ8NGP9J8J3TZ",
-    "attemptOfResetPassword": 0,
-    "address": {
-      "state": "IQ",
-      "city": "Baghdad"
-    }
-  },
-  {
-    "name": {
-      "first": "Wasim",
-      "last": "Madfaa"
-    },
-    "email": "wm.madfaa@gmail.com",
-    "passwordSalt": "$2a$12$IJrWqX5ZnHP8DKHTSY4Eeu",
-    "password": "$2a$12$IJrWqX5ZnHP8DKHTSY4Eeub73rWmkPnXoQXdm95v1su8xvkF342SS",
-    "avatar": "",
-    "status": "ACTIVE",
-    "gender": "male",
-    "roles": ["IED_ADMIN"],
-    "verificationId": "01EGXMD8378F5TZ8NGP9J8J3TZ",
-    "attemptOfResetPassword": 0,
-    "address": {
-      "state": "IQ",
-      "city": "Baghdad"
-    }
-  },
-  {
-    "name": {
-      "first": "Publisher",
-      "last": "Tester"
-    },
-    "email": "publisher@gmail.com",
-    "passwordSalt": "$2a$12$934UPokjEnsxH/IilnG3GO",
-    "password": "$2a$12$934UPokjEnsxH/IilnG3GO7sQc4/yJU/0CyBAyegaDpNG93Uo.srq",
-    "avatar": "",
-    "status": "ACTIVE",
-    "gender": "male",
-    "roles": ["IED_PUBLISHER", "IES_PUBLISHER"],
+    "roles": ["KAK_ADMIN"],
     "verificationId": "01EGXMD8378F5TZ8NGP9J8J3TZ",
     "attemptOfResetPassword": 0,
     "address": {
