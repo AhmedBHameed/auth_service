@@ -35,17 +35,11 @@ jobs:
 
       - name: Deploy to server
         uses: appleboy/ssh-action@master
-        env:
-          CI: true
-          ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-          MONGODB_PASS: ${{ secrets.MONGODB_PASS }}
-          MONGODB_USER: ${{ secrets.MONGODB_USER }}
-          VERSION: ${{ secrets.VERSION }}
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          script: cd ${{ secrets.PROJECT_PATH }} && git pull && /home/nodeys/.nvm/versions/node/v12.16.3/bin/node prepareEnvironment.js
+          script: cd ${{ secrets.PROJECT_PATH }} && git pull && /home/nodeys/.nvm/versions/node/v12.16.3/bin/node prepareEnvironment.js -ENVIRONMENT ${{ secrets.ENVIRONMENT }} -MONGODB_PASS ${{ secrets.MONGODB_PASS }} -MONGODB_USER ${{ secrets.MONGODB_USER }} -VERSION ${{ secrets.VERSION }}  -NODE_ENV ${{ secrets.NODE_ENV }}
       # - name: slack - GitHub Actions Slack integration
       #   uses: act10ns/slack@v1.2.2
       #   with:
