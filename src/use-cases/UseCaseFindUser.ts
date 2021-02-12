@@ -30,7 +30,9 @@ const findUserValidationSchema = Joi.object<FindUserByIdSchema>({
   appName: Joi.string().required(),
 });
 const findUserByEmailValidationSchema = Joi.object<LoginSchema>({
-  email: Joi.string().email().required(),
+  email: Joi.string()
+    .email({tlds: {allow: false}})
+    .required(),
   password: Joi.string().required(),
   appName: Joi.string().required(),
   // extraData: [Joi.string().optional(), Joi.allow(null)],

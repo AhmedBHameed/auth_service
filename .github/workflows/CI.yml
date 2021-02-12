@@ -35,12 +35,12 @@ jobs:
         env:
           CI: true
 
-      - name: slack - GitHub Actions Slack integration
-        uses: act10ns/slack@v1.2.2
-        with:
-          status: ${{ job.status }}
-          steps: ${{ toJson(steps) }}
-          channel: github-action-alerts
-        if: always()
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+      # - name: slack - GitHub Actions Slack integration
+      #   uses: act10ns/slack@v1.2.2
+      #   with:
+      #     status: ${{ job.status }}
+      #     steps: ${{ toJson(steps) }}
+      #     channel: github-action-alerts
+      #   if: always()
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

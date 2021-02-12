@@ -8,7 +8,7 @@ import {ErrorResponse} from './helpers/errorResponse';
  * statusCode: 400,
  */
 export const INVALID_TOKEN_SIGNATURE = new ErrorResponse({
-  errorCode: 'InvalidTokenSignature',
+  errorCode: 'INVALID_TOKEN_SIGNATURE',
   message: 'Invalid token signature',
   statusCode: 400,
 });

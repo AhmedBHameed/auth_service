@@ -23,7 +23,9 @@ export interface CreateUserInput {
 type CreateUserDataSchema = CreateUserInput & {passwordSalt: string};
 
 const createUserValidationSchema = Joi.object<CreateUserDataSchema>({
-  email: Joi.string().email().required(),
+  email: Joi.string()
+    .email({tlds: {allow: false}})
+    .required(),
   password: Joi.string().pattern(PASSWORD_REGULAR_EXPRESSION).required().messages({
     'string.required': 'Password field is required.',
     'string.pattern.base': `Your password must have at least: • 8 characters long Password • 1 uppercase and 1 lowercase character • 1 number • 1 non-alpha-numeric character • with no space`,

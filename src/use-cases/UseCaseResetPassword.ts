@@ -1,5 +1,5 @@
 import {injectable} from 'inversify';
-import UserModel, {IUserModel, UserStatus} from 'src/database/UserModel';
+import UserModel, {IUserModel} from 'src/database/UserModel';
 import {ulid} from 'ulid';
 
 import Joi from '@hapi/joi';
@@ -48,7 +48,6 @@ class UseCaseResetPassword {
           verificationId: ulid(),
           password: value.password,
           passwordSalt: value.passwordSalt,
-          status: UserStatus.ACTIVE,
         },
         {new: true}
       );

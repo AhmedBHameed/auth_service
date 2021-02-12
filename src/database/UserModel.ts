@@ -50,7 +50,7 @@ const UserSchema = new Schema(
       required: true,
     },
     gender: {type: String, default: ''},
-    roles: [{type: String, default: []}],
+    roles: [{type: String}],
     verificationId: {type: String, default: ''},
     attemptOfResetPassword: {type: Number, default: 0},
     address: {

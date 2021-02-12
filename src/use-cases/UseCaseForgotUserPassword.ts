@@ -23,7 +23,9 @@ export interface ForgotPasswordUserInput {
 type ForgotPasswordUserDataSchema = ForgotPasswordUserInput;
 
 const forgetUserPassValidationSchema = Joi.object<ForgotPasswordUserDataSchema>({
-  email: Joi.string().email().required(),
+  email: Joi.string()
+    .email({tlds: {allow: false}})
+    .required(),
 });
 
 @injectable()

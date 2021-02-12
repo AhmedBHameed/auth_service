@@ -73,8 +73,8 @@ class JwtLocator {
           issuer: 'Iraqi express delivery', // (issuer) OPTIONAL You should but domain name here and not the backend system name
         }
       ),
-      accessTokenExpire: 1200000,
-      refreshTokenExpire: 604800000,
+      accessTokenExpire: 15 * 60 * 1000,
+      refreshTokenExpire: 24 * 60 * 60 * 1000 * 7,
     };
   }
 }
