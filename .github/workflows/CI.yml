@@ -38,11 +38,14 @@ jobs:
         env:
           CI: true
           ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+          MONGODB_PASS: ${{ secrets.MONGODB_PASS }}
+          MONGODB_USER: ${{ secrets.MONGODB_USER }}
+          VERSION: ${{ secrets.VERSION }}
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          script: cd ${{ secrets.PROJECT_PATH }} && git pull && node prepareEnvironment.js && cd .. && ./deploy.sh
+          script: cd ${{ secrets.PROJECT_PATH }} && git pull && node prepareEnvironment.js
       # - name: slack - GitHub Actions Slack integration
       #   uses: act10ns/slack@v1.2.2
       #   with:

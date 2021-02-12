@@ -4,7 +4,6 @@ try {
   fs.writeFileSync(
     './.production.env',
     `
-REDIS_HOST=${process.env.REDIS_HOST || 'redis'}
 MONGODB_SERVER=${process.env.MONGODB_SERVER || 'mango'}
 MONGODB_DB=${process.env.MONGODB_DB || 'admin'}
 LOG_LEVEL=error
