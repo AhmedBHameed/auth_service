@@ -6,7 +6,7 @@ const prodConfig = env => {
     ...mainConfig,
     output: {
       ...mainConfig.output,
-      filename: `[name].${env}.js`,
+      filename: `[name].production.js`,
     },
     mode: 'production',
   };

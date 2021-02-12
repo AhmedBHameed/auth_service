@@ -29,12 +29,20 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - run: yarn
-      - run: yarn build
-      - run: yarn test
+      # - run: yarn
+      # - run: yarn build
+      # - run: yarn test
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
         env:
           CI: true
-
+          ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: cd ${{ secrets.PROJECT_PATH }} && git pull && node prepareEnvironment.js && cd .. && ./deploy.sh
       # - name: slack - GitHub Actions Slack integration
       #   uses: act10ns/slack@v1.2.2
       #   with:
