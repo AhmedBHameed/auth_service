@@ -45,7 +45,7 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          script: cd ${{ secrets.PROJECT_PATH }} && git pull && node prepareEnvironment.js
+          script: cd ${{ secrets.PROJECT_PATH }} && git pull && /home/nodeys/.nvm/versions/node/v12.16.3/bin/node prepareEnvironment.js
       # - name: slack - GitHub Actions Slack integration
       #   uses: act10ns/slack@v1.2.2
       #   with:
