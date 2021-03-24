@@ -10,38 +10,10 @@ const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const APP_DIR = path.resolve(__dirname, '../../src');
 const BUILD_DIR = path.resolve(__dirname, '../../dist');
 const ROOT_DIR = path.resolve(__dirname, '../../');
-const {
-  GITHUB_ACTIONS,
-  NODE_ENV,
-  PORT,
-  SECRET,
-  LOG_LEVEL,
-  MONGODB_USER,
-  MONGODB_PASS,
-  MONGODB_SERVER,
-  MONGODB_SERVER_NO_CONTAINER,
-  MONGODB_PORT,
-  MONGODB_DB,
-  VERSION
-} = process.env;
+
+const {NODE_ENV} = process.env;
 
 const config = () => {
-  const environments = GITHUB_ACTIONS
-    ? {
-        NODE_ENV,
-        PORT,
-        SECRET,
-        LOG_LEVEL,
-        MONGODB_USER,
-        MONGODB_PASS,
-        MONGODB_SERVER,
-        MONGODB_SERVER_NO_CONTAINER,
-        MONGODB_PORT,
-        MONGODB_DB,
-        VERSION
-      }
-    : dotenv.config({path: `${ROOT_DIR}/.${NODE_ENV}.env`}).parsed;
-
   return {
     entry: {
       app: `${APP_DIR}/app.ts`,
@@ -62,7 +34,7 @@ const config = () => {
     plugins: [
       new ESLintPlugin(),
       new DefinePlugin({
-        'process.env': JSON.stringify(environments),
+        'process.env': JSON.stringify(dotenv.config({path: `${ROOT_DIR}/.${NODE_ENV}.env`}).parsed),
       }),
       new CleanWebpackPlugin(),
       new NodemonPlugin(),
