@@ -44,10 +44,11 @@ jobs:
             git pull origin main
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
-            npm run build
             cd ..
             echo "🔄 Shutdown docker container ..."
             sudo docker-compose -f docker-compose.prod.yml stop
+            echo "🛠️ Building project ..."
+            sudo docker-compose -f docker-auth.build.yml up
             echo "🚀 Starting docker container ..."
             sudo docker-compose -f docker-compose.prod.yml up -d
       # - name: slack - GitHub Actions Slack integration

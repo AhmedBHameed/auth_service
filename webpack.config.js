@@ -8,9 +8,8 @@ const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const APP_DIR = path.resolve(__dirname, './src');
 const BUILD_DIR = path.resolve(__dirname, './dist');
 
-const {BUILD_ENV, VERSION} = process.env;
+const {BUILD_ENV, VERSION, MONGODB_PASS, SECRET} = process.env;
 const isProd = BUILD_ENV === 'production';
-
 function buildConfig() {
   const {BUILD_ENV} = process.env;
   if (BUILD_ENV !== 'development' && BUILD_ENV !== 'production')
@@ -40,6 +39,8 @@ function buildConfig() {
         'process.env': JSON.stringify({
           BUILD_ENV,
           VERSION,
+          MONGODB_PASS,
+          SECRET,
         }),
       }),
       new CleanWebpackPlugin(),
