@@ -251,7 +251,7 @@ try {
   fs.writeFileSync(
     './.production.env',
     `
-MONGODB_SERVER=${argv.MONGODB_SERVER || 'mango'}
+MONGODB_SERVER=${argv.MONGODB_SERVER || 'mongo'}
 MONGODB_DB=${argv.MONGODB_DB || 'admin'}
 LOG_LEVEL=error
 

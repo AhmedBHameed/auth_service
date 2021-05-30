@@ -9,7 +9,7 @@ export default {
     dbName: 'admin',
     password: MONGODB_PASS || '',
     port: 27017,
-    server: 'mango',
+    server: 'mongo',
     user: 'super',
   },
   logs: {
