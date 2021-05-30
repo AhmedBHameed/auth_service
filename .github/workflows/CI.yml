@@ -6,9 +6,9 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
-    branches: [master]
+    branches: [main]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -39,7 +39,10 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          script: cd ${{ secrets.PROJECT_PATH }} && git pull && /home/nodeys/.nvm/versions/node/v12.16.3/bin/node prepareEnvironment.js --ENVIRONMENT ${{ secrets.ENVIRONMENT }} --MONGODB_PASS ${{ secrets.MONGODB_PASS }} --MONGODB_USER ${{ secrets.MONGODB_USER }} --VERSION ${{ secrets.VERSION }}  --NODE_ENV ${{ secrets.NODE_ENV }}
+          script: |
+            cd ${{ secrets.PROJECT_PATH }}
+            git pull origin main
+            MONGODB_PASS=${{ secrets.MONGODB_PASS }} SECRET=${{ secrets.SECRET }} VERSION=${{ secrets.VERSION }} npm run build
       # - name: slack - GitHub Actions Slack integration
       #   uses: act10ns/slack@v1.2.2
       #   with:
