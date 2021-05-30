@@ -42,7 +42,15 @@ jobs:
           script: |
             cd ${{ secrets.PROJECT_PATH }}
             git pull origin main
+            git pull origin main
+            export NVM_DIR=~/.nvm
+            source ~/.nvm/nvm.sh
             MONGODB_PASS=${{ secrets.MONGODB_PASS }} SECRET=${{ secrets.SECRET }} VERSION=${{ secrets.VERSION }} npm run build
+            cd ..
+            echo "🔄 Shutdown docker container ..."
+            sudo docker-compose -f docker-compose.prod.yml stop
+            echo "🚀 Starting docker container ..."
+            sudo docker-compose -f docker-compose.prod.yml up -d
       # - name: slack - GitHub Actions Slack integration
       #   uses: act10ns/slack@v1.2.2
       #   with:
