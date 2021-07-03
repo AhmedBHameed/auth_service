@@ -78,8 +78,8 @@
     "url": "git+https://github.com/AhmedBHameed/kakiee_auth_service.git"
   },
   "scripts": {
-    "build": "BUILD_ENV=production VERSION=$npm_package_version webpack --mode production",
-    "dev": "BUILD_ENV=development VERSION=$npm_package_version SECRET=Test MONGODB_PASS=z9Pzq958RbA9tNyEyAIo99KEqIE4vc2V VERSION=$npm_package_version webpack --watch --mode development",
+    "build": "VERSION=$npm_package_version BUILD_ENV=production MONGODB_PASS=iQ4kAbHnHqme9Mhm16jRIxz3QBpP4Z SECRET=lFlvWBrgGI9KNtHX6uAC06cSq8f4DkP7 webpack --mode production",
+    "dev": "VERSION=$npm_package_version BUILD_ENV=development SECRET=Test MONGODB_PASS=z9Pzq958RbA9tNyEyAIo99KEqIE4vc2V webpack --watch --mode development",
     "start": "BUILD_ENV=production webpack --mode production && node dist/app.production.js",
     "lint:r": "eslint src/ --ext .ts",
     "lint:r:fix": "npm run lint:r -- --fix",

@@ -44,16 +44,19 @@ jobs:
             git pull origin main
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
+            echo "🛫 Building application"
+            yarn
+            yarn build
             cd ..
             echo "ℹ️ Disk space usage"
             df -h
             echo "🔄 Shutdown docker container ..."
-            sudo docker-compose -f docker-compose.yml stop
+            sudo docker-compose -f docker-compose.prod.yml stop
             echo "🪣 Removing docker containers,images"
             docker container rm $(docker container ls -aq -f "name=auth_service")
             docker rmi -f $(docker images --filter "reference=*echosystem_authentication*" -q)
             echo "🚀 Starting docker container ..."
-            sudo docker-compose -f docker-compose.yml up -d
+            sudo docker-compose -f docker-compose.prod.yml up -d
       # - name: slack - GitHub Actions Slack integration
       #   uses: act10ns/slack@v1.2.2
       #   with:
