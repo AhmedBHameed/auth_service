@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
-jobs:
+jobs: 
   # This workflow contains a single job called "build"
   build:
     runs-on: ubuntu-latest
@@ -45,18 +45,19 @@ jobs:
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
             echo "🛫 Building application"
-            yarn
-            yarn build
+            npm install
+            npm run build
             cd ..
-            echo "ℹ️ Disk space usage"
-            df -h
+          # echo "ℹ️ Disk space usage"
+          # df -h
             echo "🔄 Shutdown docker container ..."
             sudo docker-compose -f docker-compose.prod.yml stop
-            echo "🪣 Removing docker containers,images"
-            docker container rm $(docker container ls -aq -f "name=auth_service")
-            docker rmi -f $(docker images --filter "reference=*echosystem_authentication*" -q)
+            # echo "🪣 Removing docker containers,images"
+          # docker container rm $(docker container ls -aq -f "name=auth_service")
+          # docker rmi -f $(docker images --filter "reference=*echosystem_authentication*" -q)
             echo "🚀 Starting docker container ..."
             sudo docker-compose -f docker-compose.prod.yml up -d
+            echo "🏁"
       # - name: slack - GitHub Actions Slack integration
       #   uses: act10ns/slack@v1.2.2
       #   with:
