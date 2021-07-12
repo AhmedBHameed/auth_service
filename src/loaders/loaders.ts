@@ -1,6 +1,5 @@
 import 'reflect-metadata';
 
-import bodyParser from 'body-parser';
 import express from 'express';
 import {Container} from 'inversify';
 import environment from 'src/config/environment';
@@ -22,8 +21,8 @@ export default async (): Promise<void> => {
 
   const app = express();
 
-  app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({extended: true}));
+  app.use(express.json());
+  app.use(express.urlencoded({extended: true}));
   app.use(allowOriginAccess());
 
   app.post('/api/generate-tokens', (req, res) => userDataController.GenerateToken(req, res));
