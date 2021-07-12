@@ -46,7 +46,7 @@ jobs:
             source ~/.nvm/nvm.sh
             echo "🛫 Building application"
             npm install
-            npm run build
+            MONGODB_PASS=${{ secrets.MONGODB_PASS }} SECRET=${{ secrets.SECRET }} npm run build
             cd ..
             echo "🔄 Shutdown docker container ..."
             sudo docker-compose -f docker-compose.prod.yml stop
