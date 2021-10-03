@@ -14,12 +14,20 @@
     "**/.DS_Store": true,
     "node_modules": true
   },
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "cSpell.words": [
     "Dockerized",
+    "ahmedhameed",
+    "blogdb",
     "casify",
+    "dataloader",
+    "datasource",
     "inversify",
     "ulid"
   ],
-  "editor.codeLens": false
+  "editor.codeLens": false,
+  "git.ignoreLimitWarning": true
 }

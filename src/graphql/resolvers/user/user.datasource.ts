@@ -1,0 +1,193 @@
+/**
+ * To read more about graphql data structure @see https://www.apollographql.com/docs/apollo-server/data/data-sources/
+ * Also deep dive of data structure @see https://www.apollographql.com/blog/backend/data-sources/a-deep-dive-on-apollo-data-sources/
+ * */
+
+// import DataLoader from 'dataloader'
+import {DataSource} from 'apollo-datasource';
+import {ApolloError, AuthenticationError} from 'apollo-server-core';
+import {
+  CreateUserInput,
+  ListUsersCollateInput,
+  Maybe,
+  UpdateUserInput,
+} from 'src/graphql/models';
+import {getSaltAndHashedPassword} from 'src/services';
+import {callTryCatch} from 'src/util';
+import {ulid} from 'ulid';
+
+import UserDbModel, {IUserModel} from '../_database/user.model';
+import DuplicationError from '../_errors/DuplicationError.error';
+import NotFoundError from '../_errors/NotFoundError.error';
+
+// const PLACES_INDEX = 'places:index'
+// const CITIES_INDEX = 'cities:index'
+// const STATES_INDEX = 'states:index'
+
+// const LIMIT = 20000
+
+export default class UserDataSource extends DataSource {
+  constructor() {
+    super();
+    //   this.redis = redis
+    //   this.loader = new DataLoader(
+    //     requests => this.load(requests),
+    //     { cacheKeyFn: JSON.stringify }
+    //   )
+    this.getUserById = this.getUserById.bind(this);
+    this.throwAuthenticationError = this.throwAuthenticationError.bind(this);
+    this.unknownError = this.unknownError.bind(this);
+  }
+
+  async getUserById(id: string) {
+    const responseResult = await callTryCatch<IUserModel | null, Error>(
+      async () =>
+        UserDbModel.findOne({id}).select(['-password', '-passwordSalt'])
+    );
+
+    if (responseResult instanceof Error) this.unknownError(responseResult);
+
+    if (!responseResult) {
+      throw new ApolloError('User not found!');
+    }
+
+    return responseResult as IUserModel;
+  }
+
+  async listUsers(input?: Maybe<ListUsersCollateInput>) {
+    // const page = value.page || 1;
+    //   const perPage = value.perPage || 20;
+
+    let page = 1;
+    let pageSize = 50;
+    let filterConfig: any;
+
+    if (input?.paginate) {
+      if (!page || page < 1) page = 1;
+      if (!pageSize || pageSize > 50) pageSize = 50;
+    }
+
+    if (input?.filter) {
+      const filterJson = JSON.stringify(input.filter).replace(/_/g, '$');
+      filterConfig = JSON.parse(filterJson);
+    }
+
+    const responseResult = await callTryCatch<IUserModel[], Error>(async () =>
+      UserDbModel.find(filterConfig)
+        .skip(pageSize * (page - 1))
+        .limit(pageSize * page)
+        .select(['-password', '-passwordSalt'])
+        .exec()
+    );
+
+    if (responseResult instanceof Error) {
+      throw this.unknownError(responseResult);
+    }
+
+    return responseResult;
+  }
+
+  async deleteUser(id: string) {
+    const responseResult = await callTryCatch<IUserModel | null, Error>(
+      async () =>
+        UserDbModel.findByIdAndDelete(id).select([
+          '-password',
+          '-passwordSalt',
+          '-attemptOfResetPassword',
+          '-verificationId',
+          '-status',
+        ])
+    );
+
+    if (responseResult instanceof Error) this.unknownError(responseResult);
+
+    if (!responseResult) {
+      throw new ApolloError('User not found!');
+    }
+
+    return responseResult || {};
+  }
+
+  async createUser(input: CreateUserInput) {
+    const responseResult = await callTryCatch<IUserModel | null, Error>(
+      async () => {
+        const {password, passwordSalt} = getSaltAndHashedPassword(
+          input.password
+        );
+        const newUser = await UserDbModel.create({
+          ...input,
+          id: ulid(),
+          email: input.email.toLowerCase(),
+          isSuper: false,
+          isActive: false,
+          password,
+          passwordSalt,
+          name: {
+            first: input.firstName,
+            last: input.lastName,
+          },
+          attemptOfResetPassword: 0,
+        });
+
+        const user = await newUser.save();
+        return user;
+      }
+    );
+
+    if (responseResult instanceof Error) {
+      if ((responseResult as any).code === 11000)
+        throw new DuplicationError(responseResult.message);
+
+      if (responseResult instanceof Error)
+        throw this.unknownError(responseResult);
+    }
+
+    return responseResult || {};
+  }
+
+  async updateUser(input: UpdateUserInput) {
+    const responseResult = await callTryCatch<IUserModel | null, Error>(
+      async () =>
+        UserDbModel.findOneAndUpdate(
+          {id: input.id},
+          {
+            ...input,
+            name: {
+              first: input.firstName,
+              last: input.lastName,
+            },
+          },
+          {new: true}
+        )
+    );
+
+    if (responseResult instanceof Error)
+      throw this.unknownError(responseResult);
+
+    if (!responseResult) throw new NotFoundError('User not found!');
+
+    return responseResult || {};
+  }
+
+  // Required when we need to invalidate user token.
+  async checkUserVerificationId(userId: string, verificationId: string) {
+    const userResult = (await this.getUserById(userId)) as IUserModel & {
+      verificationId: string;
+    };
+    if (userResult.verificationId !== verificationId)
+      this.throwAuthenticationError();
+  }
+
+  // Errors
+  throwAuthenticationError(responseResult?: any) {
+    throw new AuthenticationError('Unauthenticated call', responseResult);
+  }
+
+  unknownError(responseResult?: any) {
+    return new ApolloError(
+      responseResult.message,
+      'INTERNAL_SERVER_ERROR',
+      responseResult
+    );
+  }
+}

@@ -1,0 +1,21 @@
+version: '3.4'
+
+networks:
+  xentral:
+    driver: bridge
+
+services:
+  graphql:
+    hostname: graphql
+    container_name: graphql
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: ['yarn', 'start']
+    volumes:
+      - ./:/usr/graphql
+      - /usr/graphql/node_modules
+    ports:
+      - '9000:9000'
+    networks:
+      - xentral
