@@ -1,9 +1,9 @@
 import {gql} from 'apollo-server-core';
 
 const AUTHENTICATION_TYPES = gql`
-  """
-  Authentication input model
-  """
+  #
+  # ################## Authentication input model ##################
+  #
   input AuthInput {
     email: EmailAddress!
     password: Password!
@@ -19,10 +19,39 @@ const AUTHENTICATION_TYPES = gql`
     refreshTokenExpire: Int
   }
 
-  type VerifyToken {
-    id: ID
+  type Me @key(fields: "id") {
+    id: ID!
     isSuper: Boolean
     actions: [UserAction]
+  }
+
+  #
+  # ################## Authorization input model ##################
+  #
+  type UserAction {
+    name: String
+    permissions: [String]
+  }
+
+  type Authorization {
+    id: ID
+    userId: ID
+    actions: [UserAction]
+    createdAt: Date
+    updatedAt: Date
+  }
+
+  #
+  # ################## Update authorization ##################
+  #
+  input ActionInput {
+    name: RequiredString!
+    permissions: [RequiredString!]!
+  }
+
+  input AuthorizationInput {
+    userId: ID
+    actions: [ActionInput]!
   }
 `;
 

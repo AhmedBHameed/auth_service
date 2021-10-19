@@ -32,6 +32,7 @@ export type Scalars = {
   PositiveInt: any;
   /** Required string scalar custom type */
   RequiredString: any;
+  _Any: any;
 };
 
 export type ActionInput = {
@@ -48,7 +49,6 @@ export type Auth = {
   refreshTokenExpire?: Maybe<Scalars['Int']>;
 };
 
-/** Authentication input model */
 export type AuthInput = {
   email: Scalars['EmailAddress'];
   password: Scalars['Password'];
@@ -86,6 +86,13 @@ export type ListUsersCollateInput = {
   sort?: Maybe<SortingByFieldInput>;
 };
 
+export type Me = {
+  __typename?: 'Me';
+  actions?: Maybe<Array<Maybe<UserAction>>>;
+  id: Scalars['ID'];
+  isSuper?: Maybe<Scalars['Boolean']>;
+};
+
 export type Message = {
   __typename?: 'Message';
   message?: Maybe<Scalars['String']>;
@@ -94,12 +101,23 @@ export type Message = {
 export type Mutation = {
   __typename?: 'Mutation';
   createUser?: Maybe<User>;
+  /** Set user access to forbidden. User in this case should reset their password to reactivate and change password. */
+  invalidateUserAccess?: Maybe<Message>;
+  resetPassword?: Maybe<Message>;
   updateAuthorization?: Maybe<Authorization>;
   updateUser?: Maybe<User>;
 };
 
 export type MutationCreateUserArgs = {
   input: CreateUserInput;
+};
+
+export type MutationInvalidateUserAccessArgs = {
+  userId: Scalars['ID'];
+};
+
+export type MutationResetPasswordArgs = {
+  input: ResetPasswordInput;
 };
 
 export type MutationUpdateAuthorizationArgs = {
@@ -126,14 +144,19 @@ export type PaginationInput = {
 
 export type Query = {
   __typename?: 'Query';
+  _entities: Array<Maybe<_Entity>>;
   _service: _Service;
   clearTokens?: Maybe<Message>;
   createTokens?: Maybe<Auth>;
   getUser?: Maybe<User>;
   getUserAuthorization?: Maybe<Authorization>;
   listUsers?: Maybe<Array<Maybe<User>>>;
+  me?: Maybe<Me>;
   refreshTokens?: Maybe<Auth>;
-  verifyMe?: Maybe<VerifyToken>;
+};
+
+export type Query_EntitiesArgs = {
+  representations: Array<Scalars['_Any']>;
 };
 
 export type QueryCreateTokensArgs = {
@@ -150,6 +173,12 @@ export type QueryGetUserAuthorizationArgs = {
 
 export type QueryListUsersArgs = {
   input?: Maybe<ListUsersCollateInput>;
+};
+
+export type ResetPasswordInput = {
+  newPassword: Scalars['Password'];
+  userId: Scalars['ID'];
+  verificationId: Scalars['ID'];
 };
 
 /** Single sorting configuration by field name and direction. An object of `key` `direction` properties is required when applying for sorting. */
@@ -241,12 +270,7 @@ export type UsersFilterInput = {
   updatedAt?: Maybe<Scalars['String']>;
 };
 
-export type VerifyToken = {
-  __typename?: 'VerifyToken';
-  actions?: Maybe<Array<Maybe<UserAction>>>;
-  id?: Maybe<Scalars['ID']>;
-  isSuper?: Maybe<Scalars['Boolean']>;
-};
+export type _Entity = Me;
 
 export type _Service = {
   __typename?: '_Service';
@@ -376,6 +400,7 @@ export type ResolversTypes = ResolversObject<{
   ID: ResolverTypeWrapper<Scalars['ID']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   ListUsersCollateInput: ListUsersCollateInput;
+  Me: ResolverTypeWrapper<Me>;
   Message: ResolverTypeWrapper<Message>;
   Mutation: ResolverTypeWrapper<{}>;
   PaginationInput: PaginationInput;
@@ -383,6 +408,7 @@ export type ResolversTypes = ResolversObject<{
   PositiveInt: ResolverTypeWrapper<Scalars['PositiveInt']>;
   Query: ResolverTypeWrapper<{}>;
   RequiredString: ResolverTypeWrapper<Scalars['RequiredString']>;
+  ResetPasswordInput: ResetPasswordInput;
   SortingByFieldInput: SortingByFieldInput;
   SortingEnum: SortingEnum;
   String: ResolverTypeWrapper<Scalars['String']>;
@@ -393,7 +419,8 @@ export type ResolversTypes = ResolversObject<{
   Username: ResolverTypeWrapper<Username>;
   UsernameInput: UsernameInput;
   UsersFilterInput: UsersFilterInput;
-  VerifyToken: ResolverTypeWrapper<VerifyToken>;
+  _Any: ResolverTypeWrapper<Scalars['_Any']>;
+  _Entity: ResolversTypes['Me'];
   _Service: ResolverTypeWrapper<_Service>;
 }>;
 
@@ -411,6 +438,7 @@ export type ResolversParentTypes = ResolversObject<{
   ID: Scalars['ID'];
   Int: Scalars['Int'];
   ListUsersCollateInput: ListUsersCollateInput;
+  Me: Me;
   Message: Message;
   Mutation: {};
   PaginationInput: PaginationInput;
@@ -418,6 +446,7 @@ export type ResolversParentTypes = ResolversObject<{
   PositiveInt: Scalars['PositiveInt'];
   Query: {};
   RequiredString: Scalars['RequiredString'];
+  ResetPasswordInput: ResetPasswordInput;
   SortingByFieldInput: SortingByFieldInput;
   String: Scalars['String'];
   UpdateUserInput: UpdateUserInput;
@@ -427,7 +456,8 @@ export type ResolversParentTypes = ResolversObject<{
   Username: Username;
   UsernameInput: UsernameInput;
   UsersFilterInput: UsersFilterInput;
-  VerifyToken: VerifyToken;
+  _Any: Scalars['_Any'];
+  _Entity: ResolversParentTypes['Me'];
   _Service: _Service;
 }>;
 
@@ -527,6 +557,20 @@ export interface EmailAddressScalarConfig
   name: 'EmailAddress';
 }
 
+export type MeResolvers<
+  ContextType = Context,
+  ParentType extends ResolversParentTypes['Me'] = ResolversParentTypes['Me']
+> = ResolversObject<{
+  actions?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['UserAction']>>>,
+    ParentType,
+    ContextType
+  >;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isSuper?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type MessageResolvers<
   ContextType = Context,
   ParentType extends ResolversParentTypes['Message'] = ResolversParentTypes['Message']
@@ -544,6 +588,18 @@ export type MutationResolvers<
     ParentType,
     ContextType,
     RequireFields<MutationCreateUserArgs, 'input'>
+  >;
+  invalidateUserAccess?: Resolver<
+    Maybe<ResolversTypes['Message']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationInvalidateUserAccessArgs, 'userId'>
+  >;
+  resetPassword?: Resolver<
+    Maybe<ResolversTypes['Message']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationResetPasswordArgs, 'input'>
   >;
   updateAuthorization?: Resolver<
     Maybe<ResolversTypes['Authorization']>,
@@ -573,6 +629,12 @@ export type QueryResolvers<
   ContextType = Context,
   ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']
 > = ResolversObject<{
+  _entities?: Resolver<
+    Array<Maybe<ResolversTypes['_Entity']>>,
+    ParentType,
+    ContextType,
+    RequireFields<Query_EntitiesArgs, 'representations'>
+  >;
   _service?: Resolver<ResolversTypes['_Service'], ParentType, ContextType>;
   clearTokens?: Resolver<
     Maybe<ResolversTypes['Message']>,
@@ -603,13 +665,9 @@ export type QueryResolvers<
     ContextType,
     RequireFields<QueryListUsersArgs, never>
   >;
+  me?: Resolver<Maybe<ResolversTypes['Me']>, ParentType, ContextType>;
   refreshTokens?: Resolver<
     Maybe<ResolversTypes['Auth']>,
-    ParentType,
-    ContextType
-  >;
-  verifyMe?: Resolver<
-    Maybe<ResolversTypes['VerifyToken']>,
     ParentType,
     ContextType
   >;
@@ -694,18 +752,16 @@ export type UsernameResolvers<
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type VerifyTokenResolvers<
+export interface _AnyScalarConfig
+  extends GraphQLScalarTypeConfig<ResolversTypes['_Any'], any> {
+  name: '_Any';
+}
+
+export type _EntityResolvers<
   ContextType = Context,
-  ParentType extends ResolversParentTypes['VerifyToken'] = ResolversParentTypes['VerifyToken']
+  ParentType extends ResolversParentTypes['_Entity'] = ResolversParentTypes['_Entity']
 > = ResolversObject<{
-  actions?: Resolver<
-    Maybe<Array<Maybe<ResolversTypes['UserAction']>>>,
-    ParentType,
-    ContextType
-  >;
-  id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
-  isSuper?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'Me', ParentType, ContextType>;
 }>;
 
 export type _ServiceResolvers<
@@ -721,6 +777,7 @@ export type Resolvers<ContextType = Context> = ResolversObject<{
   Authorization?: AuthorizationResolvers<ContextType>;
   Date?: GraphQLScalarType;
   EmailAddress?: GraphQLScalarType;
+  Me?: MeResolvers<ContextType>;
   Message?: MessageResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Password?: GraphQLScalarType;
@@ -731,7 +788,8 @@ export type Resolvers<ContextType = Context> = ResolversObject<{
   UserAction?: UserActionResolvers<ContextType>;
   UserAddress?: UserAddressResolvers<ContextType>;
   Username?: UsernameResolvers<ContextType>;
-  VerifyToken?: VerifyTokenResolvers<ContextType>;
+  _Any?: GraphQLScalarType;
+  _Entity?: _EntityResolvers<ContextType>;
   _Service?: _ServiceResolvers<ContextType>;
 }>;
 

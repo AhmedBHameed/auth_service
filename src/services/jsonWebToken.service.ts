@@ -7,7 +7,7 @@ import {
   TokenExpiredError,
   verify,
 } from 'jsonwebtoken';
-import {UserAction} from 'src/graphql/models';
+import {} from 'src/graphql/models';
 import {ulid} from 'ulid';
 
 import environment from '../config/environment';
@@ -19,7 +19,8 @@ import environment from '../config/environment';
 export interface JWTPayload {
   id: string;
   verificationId: string;
-  actions: UserAction[];
+  // UserAction[]
+  actions: any[];
   isActive: boolean;
   isSuper: boolean;
 }

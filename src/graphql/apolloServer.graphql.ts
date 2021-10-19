@@ -5,11 +5,7 @@ import {counter, histogram} from 'src/services/prometheus.service';
 
 import environment from '../config/environment';
 import monitorPerformance from './plugins/monitorPerformance.plugin';
-import {
-  AuthenticationDataSource,
-  AuthorizationDataSource,
-  UserDataSource,
-} from './resolvers';
+import {AuthenticationDataSource, UserDataSource} from './resolvers';
 import schema from './schema.graphql';
 
 const {IS_PRODUCTION} = environment;
@@ -28,8 +24,7 @@ const apolloServer = new ApolloServer({
   ],
   dataSources: () => ({
     user: new UserDataSource(),
-    authentication: new AuthenticationDataSource(),
-    authorization: new AuthorizationDataSource(),
+    auth: new AuthenticationDataSource(),
   }),
   context: async ({req, res}) => ({req, res, histogram, counter}),
 });

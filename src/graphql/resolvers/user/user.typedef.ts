@@ -120,6 +120,15 @@ const USER_TYPES = gql`
     firstName: String
     lastName: String
   }
+
+  #
+  # ################## Reset user password ##################
+  #
+  input ResetPasswordInput {
+    verificationId: ID!
+    userId: ID!
+    newPassword: Password!
+  }
 `;
 
 export default USER_TYPES;

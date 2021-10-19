@@ -6,9 +6,11 @@ import helmet from 'helmet';
 import http from 'http';
 import environment from 'src/config/environment';
 import xss from 'src/middleware/cleanXss.middleware';
+import {connectRedis} from 'src/services';
 import {initLogger} from 'src/services/logger.service';
 import logWelcome from 'src/util/logWelcome';
 
+import activateUserAccountController from './Controller/activateUserAccount.controller';
 import changelogController from './Controller/changelog.controller';
 import apolloServer from './graphql/apolloServer.graphql';
 import initDbConnection from './services/mongoDbConnection.service';
@@ -19,6 +21,7 @@ const {SERVER_BASE_PATH, SERVER_PORT} = environment;
 (async () => {
   initLogger();
 
+  await connectRedis();
   const connectionStatus = await initDbConnection();
   if (connectionStatus !== 1)
     throw new Error('🔥 Loaders are not ready! please check log file');
@@ -40,8 +43,10 @@ const {SERVER_BASE_PATH, SERVER_PORT} = environment;
     cors: false,
   });
   app.get('/changelog', changelogController);
+  // ! Temporarily for testing.
+  app.get('/activate-user', activateUserAccountController);
 
-  app.use('/metrics', async (req, res) => {
+  app.use('/metrics', async (_, res) => {
     res.set('Content-Type', client.register.contentType);
     res.end(await client.register.metrics());
   });

@@ -6,19 +6,17 @@ const AuthenticationResolvers: Resolvers = {
   },
   Query: {
     createTokens: async (_, {input}, {dataSources}) => {
-      const {createTokens} = dataSources.authentication;
+      const {createTokens} = dataSources.auth;
       const tokens = await createTokens({
         email: input.email,
         password: input.password,
       });
       return tokens;
     },
-    verifyMe: async (_, __, {req, dataSources}) => {
-      const {authentication, user} = dataSources;
+    me: async (_, __, {req, dataSources}) => {
+      const {auth, user} = dataSources;
       const accessToken = req.cookies.ACCESS_TOKEN;
-      const tokenPayload = await authentication.verifyAccessToken(
-        accessToken || ''
-      );
+      const tokenPayload = await auth.verifyAccessToken(accessToken || '');
 
       const {id, verificationId, actions, isSuper} = tokenPayload.data;
 
@@ -32,12 +30,10 @@ const AuthenticationResolvers: Resolvers = {
       };
     },
     refreshTokens: async (_, __, {req, dataSources}) => {
-      const {authentication, user} = dataSources;
+      const {auth, user} = dataSources;
       const refreshToken = req.cookies.REFRESH_TOKEN;
 
-      const {tokens, payload} = await authentication.refreshTokens(
-        refreshToken
-      );
+      const {tokens, payload} = await auth.refreshTokens(refreshToken);
 
       await user.checkUserVerificationId(payload.id, payload.verificationId);
 
@@ -46,6 +42,22 @@ const AuthenticationResolvers: Resolvers = {
     clearTokens: () => ({
       message: 'Token has been cleared!',
     }),
+    getUserAuthorization: async () => ({}),
+  },
+  Mutation: {
+    updateAuthorization: async (_, {input}, {req, dataSources}) => {
+      const {auth} = dataSources;
+
+      const accessToken = req.cookies.ACCESS_TOKEN;
+
+      await auth.isAuthorizedUser(accessToken, {
+        modelName: 'authorizations',
+        permission: 'read',
+      });
+
+      const userAuthorization = await accessToken.updateAuthorization(input);
+      return userAuthorization;
+    },
   },
 };
 

@@ -10,15 +10,18 @@ import {
   CreateUserInput,
   ListUsersCollateInput,
   Maybe,
+  ResetPasswordInput,
   UpdateUserInput,
 } from 'src/graphql/models';
-import {getSaltAndHashedPassword} from 'src/services';
+import {getSaltAndHashedPassword, redisClient} from 'src/services';
 import {callTryCatch} from 'src/util';
 import {ulid} from 'ulid';
 
 import UserDbModel, {IUserModel} from '../_database/user.model';
 import DuplicationError from '../_errors/DuplicationError.error';
 import NotFoundError from '../_errors/NotFoundError.error';
+
+const USER_IDENTIFIER_KEY = 'USER';
 
 // const PLACES_INDEX = 'places:index'
 // const CITIES_INDEX = 'cities:index'
@@ -35,6 +38,7 @@ export default class UserDataSource extends DataSource {
     //     { cacheKeyFn: JSON.stringify }
     //   )
     this.getUserById = this.getUserById.bind(this);
+    this.invalidateUserAccess = this.invalidateUserAccess.bind(this);
     this.throwAuthenticationError = this.throwAuthenticationError.bind(this);
     this.unknownError = this.unknownError.bind(this);
   }
@@ -51,7 +55,7 @@ export default class UserDataSource extends DataSource {
       throw new ApolloError('User not found!');
     }
 
-    return responseResult as IUserModel;
+    return responseResult as IUserModel & {verificationId: string};
   }
 
   async listUsers(input?: Maybe<ListUsersCollateInput>) {
@@ -120,6 +124,7 @@ export default class UserDataSource extends DataSource {
           email: input.email.toLowerCase(),
           isSuper: false,
           isActive: false,
+          verificationId: ulid(),
           password,
           passwordSalt,
           name: {
@@ -142,7 +147,7 @@ export default class UserDataSource extends DataSource {
         throw this.unknownError(responseResult);
     }
 
-    return responseResult || {};
+    return responseResult as IUserModel & {verificationId: string};
   }
 
   async updateUser(input: UpdateUserInput) {
@@ -169,6 +174,31 @@ export default class UserDataSource extends DataSource {
     return responseResult || {};
   }
 
+  async resetUserPassword(input: ResetPasswordInput) {
+    const {password, passwordSalt} = getSaltAndHashedPassword(
+      input.newPassword
+    );
+    await UserDbModel.findOneAndUpdate(
+      {
+        verificationId: input.verificationId,
+        id: input.userId,
+      },
+      {
+        isActive: true,
+        verificationId: ulid(),
+        password,
+        passwordSalt,
+      },
+      {new: true}
+    );
+
+    // TODO: if user exist, send an email to clarification.
+
+    return {
+      message: 'Done',
+    };
+  }
+
   // Required when we need to invalidate user token.
   async checkUserVerificationId(userId: string, verificationId: string) {
     const userResult = (await this.getUserById(userId)) as IUserModel & {
@@ -176,6 +206,34 @@ export default class UserDataSource extends DataSource {
     };
     if (userResult.verificationId !== verificationId)
       this.throwAuthenticationError();
+  }
+
+  async invalidateUserAccess(userId: string) {
+    const userData = await this.getUserById(userId);
+    await redisClient.set(
+      `${USER_IDENTIFIER_KEY}:${userId}:${userData.verificationId}`,
+      'access_forbidden',
+      'ex',
+      60 * 60 * 24 * 7 // Expire for 7 days till reset password attempt.
+    );
+
+    const responseResult = await callTryCatch<IUserModel | null, Error>(
+      async () =>
+        UserDbModel.findOneAndUpdate(
+          {id: userId},
+          {
+            isActive: false,
+          },
+          {new: true}
+        )
+    );
+
+    if (responseResult instanceof Error)
+      throw this.unknownError(responseResult);
+
+    if (!responseResult) throw new NotFoundError('User not found!');
+
+    return {message: 'User token has been invalidate'};
   }
 
   // Errors

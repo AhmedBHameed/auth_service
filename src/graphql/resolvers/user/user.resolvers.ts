@@ -1,5 +1,6 @@
 import environment from 'src/config/environment';
 import {mailingQueue} from 'src/jobs/queues/mailing.queue';
+import renderTemplate from 'src/services/renderTemplate.service';
 import {ulid} from 'ulid';
 
 import {Resolvers} from '../../models/resolvers-types.model';
@@ -9,52 +10,66 @@ const {MAIL_USER} = environment;
 const UserResolvers: Resolvers = {
   Query: {
     getUser: async (_, {id}, {req, dataSources}) => {
-      const {authentication, authorization} = dataSources;
+      const {auth} = dataSources;
       const accessToken = req.cookies.ACCESS_TOKEN;
-      const payload = await authentication.verifyAccessToken(accessToken || '');
 
       const {getUserById} = dataSources.user;
       const usersData = await getUserById(id);
 
-      await authorization.isAuthorizedUser(
+      await auth.isAuthorizedUser(
+        accessToken,
         {modelName: 'users', permission: 'read'},
-        payload.data,
         usersData.id
       );
 
       return usersData;
     },
     listUsers: async (_, {input}, {req, dataSources}) => {
-      const {authorization, authentication, user} = dataSources;
+      const {auth, user} = dataSources;
 
       const accessToken = req.cookies.ACCESS_TOKEN;
-      const payload = await authentication.verifyAccessToken(accessToken || '');
 
-      await authorization.isAuthorizedUser(
-        {modelName: 'users', permission: 'list'},
-        payload.data
-      );
+      await auth.isAuthorizedUser(accessToken, {
+        modelName: 'users',
+        permission: 'list',
+      });
 
       const usersData = await user.listUsers(input);
       return usersData;
     },
   },
   Mutation: {
-    createUser: async (_, {input}, {req, dataSources}) => {
-      const {authentication, authorization, user} = dataSources;
-      const accessToken = req.cookies.ACCESS_TOKEN;
-      const payload = await authentication.verifyAccessToken(accessToken || '');
+    invalidateUserAccess: async (_, {userId}, {req, dataSources}) => {
+      const {user, auth} = dataSources;
 
-      await authorization.isAuthorizedUser(
-        {modelName: 'users', permission: 'create'},
-        payload.data
-      );
+      const accessToken = req.cookies.ACCESS_TOKEN;
+
+      await auth.isAuthorizedUser(accessToken, {
+        modelName: 'users',
+        permission: 'update',
+      });
+
+      const responseResult = await user.invalidateUserAccess(userId);
+      return responseResult;
+    },
+    createUser: async (_, {input}, {req, dataSources}) => {
+      const {auth, user} = dataSources;
+      const accessToken = req.cookies.ACCESS_TOKEN;
+
+      await auth.isAuthorizedUser(accessToken, {
+        modelName: 'users',
+        permission: 'create',
+      });
 
       const newUserResult = await user.createUser(input);
 
       await mailingQueue.add(
         {
-          html: `<h1>Testing email</h1>`,
+          html: renderTemplate('views/activate-user-account.hbs', {
+            baseUrl: 'https://www.google.com',
+            verificationId: newUserResult.verificationId,
+            email: newUserResult.email,
+          }),
           from: MAIL_USER,
           to: input.email,
           subject: 'Sending FROM nodemailer',
@@ -69,14 +84,13 @@ const UserResolvers: Resolvers = {
       return newUserResult;
     },
     updateUser: async (_, {input}, {req, dataSources}) => {
-      const {authentication, authorization, user} = dataSources;
+      const {auth, user} = dataSources;
       const accessToken = req.cookies.ACCESS_TOKEN;
-      const payload = await authentication.verifyAccessToken(accessToken || '');
 
-      await authorization.isAuthorizedUser(
-        {modelName: 'users', permission: 'update'},
-        payload.data
-      );
+      await auth.isAuthorizedUser(accessToken, {
+        modelName: 'users',
+        permission: 'update',
+      });
 
       const updateResult = await user.updateUser(input);
 
@@ -96,6 +110,11 @@ const UserResolvers: Resolvers = {
       );
 
       return updateResult;
+    },
+    resetPassword: async (_, {input}, {dataSources}) => {
+      const {user} = dataSources;
+      const responseResult = await user.resetUserPassword(input);
+      return responseResult;
     },
   },
 };

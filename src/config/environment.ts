@@ -35,7 +35,7 @@ const MAIL_PASS = process.env.MAIL_PASS;
  * Redis configuration
  * */
 const REDIS_HOST = process.env.REDIS_HOST;
-const REDIS_PORT = process.env.REDIS_PORT;
+const REDIS_PORT = process.env.REDIS_PORT || '';
 const REDIS_PASS = process.env.REDIS_PASS;
 
 /**

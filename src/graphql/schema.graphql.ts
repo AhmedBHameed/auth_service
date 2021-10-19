@@ -1,6 +1,8 @@
-import {buildFederatedSchema} from '@apollo/federation';
+import {buildSubgraphSchema} from '@apollo/federation';
 import {mergeResolvers, mergeTypeDefs} from '@graphql-tools/merge';
 import {gql} from 'apollo-server-express';
+import {writeFileSync} from 'fs';
+import {printIntrospectionSchema} from 'graphql';
 import {
   EmailAddressResolver,
   EmailAddressTypeDefinition as EMAIL_ADDRESS_TYPE_DEFINITION,
@@ -8,12 +10,9 @@ import {
   PositiveIntTypeDefinition as POSITIVE_INT_TYPE_DEFINITION,
 } from 'graphql-scalars';
 
-import {VerifyTokenResolvers} from './models';
 import {
   AUTHENTICATION_TYPES,
   AuthenticationResolvers,
-  AUTHORIZATION_TYPES,
-  AuthorizationResolvers,
   COMMON_PAGINATION_INPUT_CONFIG_TYPES,
   USER_TYPES,
   UserResolvers,
@@ -26,8 +25,6 @@ const typeDefs = gql`
   \`ISO 8601\` date format. E.g: 2021-08-09T09:45:16.696Z
   """
   scalar Date
-  scalar Password
-  scalar RequiredString
 
   type Message {
     message: String
@@ -35,15 +32,15 @@ const typeDefs = gql`
 
   extend type Query {
     #
-    # ########################### Authentication section ################################
+    # ########################### Authentication queries ################################
     #
     createTokens(input: AuthInput!): Auth
     refreshTokens: Auth
     clearTokens: Message
-    verifyMe: VerifyToken
+    me: Me
 
     #
-    # ########################### Permissions section ################################
+    # ########################### Permissions queries ################################
     #
     getUserAuthorization(id: ID!): Authorization
     getUser(id: ID!): User
@@ -53,26 +50,32 @@ const typeDefs = gql`
   # MUTATIONS
   extend type Mutation {
     #
-    # ########################### User section ################################
+    # ########################### User mutation ################################
     #
     createUser(input: CreateUserInput!): User
     updateUser(input: UpdateUserInput!): User
+    resetPassword(input: ResetPasswordInput!): Message
+    """
+    Set user access to forbidden. User in this case should reset their password to reactivate and change password.
+    """
+    invalidateUserAccess(userId: ID!): Message
 
     #
-    # ########################### User section ################################
+    # ########################### User mutation ################################
     #
     updateAuthorization(input: AuthorizationInput!): Authorization
   }
 `;
 
-const federatedSchema = buildFederatedSchema([
+const federatedSchema = buildSubgraphSchema([
   {
     typeDefs: mergeTypeDefs([
+      'scalar Password',
+      'scalar RequiredString',
       EMAIL_ADDRESS_TYPE_DEFINITION,
       POSITIVE_INT_TYPE_DEFINITION,
       USER_TYPES,
       AUTHENTICATION_TYPES,
-      AUTHORIZATION_TYPES,
       COMMON_PAGINATION_INPUT_CONFIG_TYPES,
       typeDefs,
     ]),
@@ -82,15 +85,17 @@ const federatedSchema = buildFederatedSchema([
       {RequiredString: requiredStringScalar},
       {PositiveInt: PositiveIntResolver},
       {
-        VerifyToken:
-          AuthenticationResolvers.VerifyToken as VerifyTokenResolvers,
+        VerifyToken: AuthenticationResolvers.VerifyToken,
       },
       UserResolvers,
       AuthenticationResolvers,
-      AuthorizationResolvers,
     ]) as any,
   },
 ]);
+
+const graphqlSchemaObj = printIntrospectionSchema(federatedSchema);
+
+writeFileSync('./schemas.graphql', graphqlSchemaObj);
 
 // const schema = lowerCaseDirectiveTransformer(federatedSchema, 'lowerCase');
 
