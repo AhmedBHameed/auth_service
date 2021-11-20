@@ -1,5 +1,23 @@
 import {Resolvers} from '../../models/resolvers-types.model';
 
+const querierAndMutatorVerifierFun = async (_, __, {req, dataSources}) => {
+  const {auth, user} = dataSources;
+  const accessToken = req.cookies.ACCESS_TOKEN;
+  const tokenPayload = await auth.verifyAccessToken(accessToken || '');
+
+  const {id, verificationId, isSuper} = tokenPayload.data;
+
+  await user.checkUserVerificationId(id, verificationId);
+  const userAuthorization = await auth.getUserAuthorization(id);
+
+  return {
+    id,
+    verificationId,
+    userActionsAsJson: JSON.stringify(userAuthorization.actions),
+    isSuper,
+  };
+};
+
 const AuthenticationResolvers: Resolvers = {
   VerifyToken: {
     actions: async ({actions}) => actions || [],
@@ -13,22 +31,7 @@ const AuthenticationResolvers: Resolvers = {
       });
       return tokens;
     },
-    me: async (_, __, {req, dataSources}) => {
-      const {auth, user} = dataSources;
-      const accessToken = req.cookies.ACCESS_TOKEN;
-      const tokenPayload = await auth.verifyAccessToken(accessToken || '');
-
-      const {id, verificationId, actions, isSuper} = tokenPayload.data;
-
-      await user.checkUserVerificationId(id, verificationId);
-
-      return {
-        id,
-        verificationId,
-        actions,
-        isSuper,
-      };
-    },
+    querier: querierAndMutatorVerifierFun,
     refreshTokens: async (_, __, {req, dataSources}) => {
       const {auth, user} = dataSources;
       const refreshToken = req.cookies.REFRESH_TOKEN;
@@ -42,9 +45,19 @@ const AuthenticationResolvers: Resolvers = {
     clearTokens: () => ({
       message: 'Token has been cleared!',
     }),
-    getUserAuthorization: async () => ({}),
+    getUserAuthorization: async (_, __, {req, dataSources}) => {
+      const {auth} = dataSources;
+      const accessToken = req.cookies.ACCESS_TOKEN;
+
+      const {data} = await auth.verifyAccessToken(accessToken);
+
+      const userPermission = await auth.getUserAuthorization(data.id);
+
+      return userPermission;
+    },
   },
   Mutation: {
+    mutator: querierAndMutatorVerifierFun,
     updateAuthorization: async (_, {input}, {req, dataSources}) => {
       const {auth} = dataSources;
 
@@ -52,10 +65,10 @@ const AuthenticationResolvers: Resolvers = {
 
       await auth.isAuthorizedUser(accessToken, {
         modelName: 'authorizations',
-        permission: 'read',
+        permission: 'update',
       });
 
-      const userAuthorization = await accessToken.updateAuthorization(input);
+      const userAuthorization = await auth.updateAuthorization(input);
       return userAuthorization;
     },
   },

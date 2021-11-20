@@ -19,12 +19,6 @@ const AUTHENTICATION_TYPES = gql`
     refreshTokenExpire: Int
   }
 
-  type Me @key(fields: "id") {
-    id: ID!
-    isSuper: Boolean
-    actions: [UserAction]
-  }
-
   #
   # ################## Authorization input model ##################
   #
@@ -41,6 +35,22 @@ const AUTHENTICATION_TYPES = gql`
     updatedAt: Date
   }
 
+  type Querier @key(fields: "id userActionsAsJson") {
+    id: ID!
+    userActionsAsJson: String!
+    occupation: String
+    about: String
+    isSuper: Boolean
+  }
+
+  type Mutator @key(fields: "id userActionsAsJson") {
+    id: ID!
+    userActionsAsJson: String!
+    occupation: String
+    about: String
+    isSuper: Boolean
+  }
+
   #
   # ################## Update authorization ##################
   #
@@ -51,7 +61,7 @@ const AUTHENTICATION_TYPES = gql`
 
   input AuthorizationInput {
     userId: ID
-    actions: [ActionInput]!
+    actions: [ActionInput!]!
   }
 `;
 

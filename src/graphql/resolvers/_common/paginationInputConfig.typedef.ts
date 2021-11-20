@@ -11,7 +11,7 @@ const COMMON_PAGINATION_INPUT_CONFIG_TYPES = gql`
   Max number for \`size\` is 50.
   """
   input PaginationInput {
-    page: PositiveInt!
+    number: PositiveInt!
     size: PositiveInt!
   }
 `;

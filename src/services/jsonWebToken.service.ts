@@ -20,7 +20,6 @@ export interface JWTPayload {
   id: string;
   verificationId: string;
   // UserAction[]
-  actions: any[];
   isActive: boolean;
   isSuper: boolean;
 }

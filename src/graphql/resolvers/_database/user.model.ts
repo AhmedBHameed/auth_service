@@ -38,6 +38,8 @@ const UserSchema = new Schema(
       },
       default: null,
     },
+    occupation: {type: String, default: ""},
+    about: {type: String, default: ""}
   },
   {timestamps: true}
 );

@@ -38,7 +38,7 @@ export default class UserDataSource extends DataSource {
     //     { cacheKeyFn: JSON.stringify }
     //   )
     this.getUserById = this.getUserById.bind(this);
-    this.invalidateUserAccess = this.invalidateUserAccess.bind(this);
+    this.invalidateUserToken = this.invalidateUserToken.bind(this);
     this.throwAuthenticationError = this.throwAuthenticationError.bind(this);
     this.unknownError = this.unknownError.bind(this);
   }
@@ -62,12 +62,13 @@ export default class UserDataSource extends DataSource {
     // const page = value.page || 1;
     //   const perPage = value.perPage || 20;
 
-    let page = 1;
+    let pageNumber = 1;
     let pageSize = 50;
     let filterConfig: any;
+    let sortConfig: any;
 
-    if (input?.paginate) {
-      if (!page || page < 1) page = 1;
+    if (input?.page) {
+      if (!pageNumber || pageNumber < 1) pageNumber = 1;
       if (!pageSize || pageSize > 50) pageSize = 50;
     }
 
@@ -76,10 +77,15 @@ export default class UserDataSource extends DataSource {
       filterConfig = JSON.parse(filterJson);
     }
 
+    if (input?.sort) {
+      sortConfig = input.sort;
+    }
+
     const responseResult = await callTryCatch<IUserModel[], Error>(async () =>
       UserDbModel.find(filterConfig)
-        .skip(pageSize * (page - 1))
-        .limit(pageSize * page)
+        .sort(sortConfig)
+        .skip(pageSize * (pageNumber - 1))
+        .limit(pageSize * pageNumber)
         .select(['-password', '-passwordSalt'])
         .exec()
     );
@@ -208,7 +214,7 @@ export default class UserDataSource extends DataSource {
       this.throwAuthenticationError();
   }
 
-  async invalidateUserAccess(userId: string) {
+  async invalidateUserToken(userId: string) {
     const userData = await this.getUserById(userId);
     await redisClient.set(
       `${USER_IDENTIFIER_KEY}:${userId}:${userData.verificationId}`,

@@ -64,7 +64,7 @@ export type Authorization = {
 };
 
 export type AuthorizationInput = {
-  actions: Array<Maybe<ActionInput>>;
+  actions: Array<ActionInput>;
   userId?: Maybe<Scalars['ID']>;
 };
 
@@ -82,15 +82,8 @@ export type CreateUserInput = {
  */
 export type ListUsersCollateInput = {
   filter?: Maybe<UsersFilterInput>;
-  paginate?: Maybe<PaginationInput>;
+  page?: Maybe<PaginationInput>;
   sort?: Maybe<SortingByFieldInput>;
-};
-
-export type Me = {
-  __typename?: 'Me';
-  actions?: Maybe<Array<Maybe<UserAction>>>;
-  id: Scalars['ID'];
-  isSuper?: Maybe<Scalars['Boolean']>;
 };
 
 export type Message = {
@@ -102,7 +95,8 @@ export type Mutation = {
   __typename?: 'Mutation';
   createUser?: Maybe<User>;
   /** Set user access to forbidden. User in this case should reset their password to reactivate and change password. */
-  invalidateUserAccess?: Maybe<Message>;
+  invalidateUserToken?: Maybe<Message>;
+  mutator?: Maybe<Mutator>;
   resetPassword?: Maybe<Message>;
   updateAuthorization?: Maybe<Authorization>;
   updateUser?: Maybe<User>;
@@ -112,7 +106,7 @@ export type MutationCreateUserArgs = {
   input: CreateUserInput;
 };
 
-export type MutationInvalidateUserAccessArgs = {
+export type MutationInvalidateUserTokenArgs = {
   userId: Scalars['ID'];
 };
 
@@ -128,6 +122,15 @@ export type MutationUpdateUserArgs = {
   input: UpdateUserInput;
 };
 
+export type Mutator = {
+  __typename?: 'Mutator';
+  about?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  isSuper?: Maybe<Scalars['Boolean']>;
+  occupation?: Maybe<Scalars['String']>;
+  userActionsAsJson: Scalars['String'];
+};
+
 /**
  * Pagination input config. An object of `page`, `size` properties is required to apply pagination.
  *
@@ -138,8 +141,17 @@ export type MutationUpdateUserArgs = {
  * Max number for `size` is 50.
  */
 export type PaginationInput = {
-  page: Scalars['PositiveInt'];
+  number: Scalars['PositiveInt'];
   size: Scalars['PositiveInt'];
+};
+
+export type Querier = {
+  __typename?: 'Querier';
+  about?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  isSuper?: Maybe<Scalars['Boolean']>;
+  occupation?: Maybe<Scalars['String']>;
+  userActionsAsJson: Scalars['String'];
 };
 
 export type Query = {
@@ -151,7 +163,7 @@ export type Query = {
   getUser?: Maybe<User>;
   getUserAuthorization?: Maybe<Authorization>;
   listUsers?: Maybe<Array<Maybe<User>>>;
-  me?: Maybe<Me>;
+  querier?: Maybe<Querier>;
   refreshTokens?: Maybe<Auth>;
 };
 
@@ -270,7 +282,7 @@ export type UsersFilterInput = {
   updatedAt?: Maybe<Scalars['String']>;
 };
 
-export type _Entity = Me;
+export type _Entity = Mutator | Querier;
 
 export type _Service = {
   __typename?: '_Service';
@@ -400,12 +412,13 @@ export type ResolversTypes = ResolversObject<{
   ID: ResolverTypeWrapper<Scalars['ID']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   ListUsersCollateInput: ListUsersCollateInput;
-  Me: ResolverTypeWrapper<Me>;
   Message: ResolverTypeWrapper<Message>;
   Mutation: ResolverTypeWrapper<{}>;
+  Mutator: ResolverTypeWrapper<Mutator>;
   PaginationInput: PaginationInput;
   Password: ResolverTypeWrapper<Scalars['Password']>;
   PositiveInt: ResolverTypeWrapper<Scalars['PositiveInt']>;
+  Querier: ResolverTypeWrapper<Querier>;
   Query: ResolverTypeWrapper<{}>;
   RequiredString: ResolverTypeWrapper<Scalars['RequiredString']>;
   ResetPasswordInput: ResetPasswordInput;
@@ -420,7 +433,7 @@ export type ResolversTypes = ResolversObject<{
   UsernameInput: UsernameInput;
   UsersFilterInput: UsersFilterInput;
   _Any: ResolverTypeWrapper<Scalars['_Any']>;
-  _Entity: ResolversTypes['Me'];
+  _Entity: ResolversTypes['Mutator'] | ResolversTypes['Querier'];
   _Service: ResolverTypeWrapper<_Service>;
 }>;
 
@@ -438,12 +451,13 @@ export type ResolversParentTypes = ResolversObject<{
   ID: Scalars['ID'];
   Int: Scalars['Int'];
   ListUsersCollateInput: ListUsersCollateInput;
-  Me: Me;
   Message: Message;
   Mutation: {};
+  Mutator: Mutator;
   PaginationInput: PaginationInput;
   Password: Scalars['Password'];
   PositiveInt: Scalars['PositiveInt'];
+  Querier: Querier;
   Query: {};
   RequiredString: Scalars['RequiredString'];
   ResetPasswordInput: ResetPasswordInput;
@@ -457,7 +471,7 @@ export type ResolversParentTypes = ResolversObject<{
   UsernameInput: UsernameInput;
   UsersFilterInput: UsersFilterInput;
   _Any: Scalars['_Any'];
-  _Entity: ResolversParentTypes['Me'];
+  _Entity: ResolversParentTypes['Mutator'] | ResolversParentTypes['Querier'];
   _Service: _Service;
 }>;
 
@@ -557,20 +571,6 @@ export interface EmailAddressScalarConfig
   name: 'EmailAddress';
 }
 
-export type MeResolvers<
-  ContextType = Context,
-  ParentType extends ResolversParentTypes['Me'] = ResolversParentTypes['Me']
-> = ResolversObject<{
-  actions?: Resolver<
-    Maybe<Array<Maybe<ResolversTypes['UserAction']>>>,
-    ParentType,
-    ContextType
-  >;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  isSuper?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export type MessageResolvers<
   ContextType = Context,
   ParentType extends ResolversParentTypes['Message'] = ResolversParentTypes['Message']
@@ -589,12 +589,13 @@ export type MutationResolvers<
     ContextType,
     RequireFields<MutationCreateUserArgs, 'input'>
   >;
-  invalidateUserAccess?: Resolver<
+  invalidateUserToken?: Resolver<
     Maybe<ResolversTypes['Message']>,
     ParentType,
     ContextType,
-    RequireFields<MutationInvalidateUserAccessArgs, 'userId'>
+    RequireFields<MutationInvalidateUserTokenArgs, 'userId'>
   >;
+  mutator?: Resolver<Maybe<ResolversTypes['Mutator']>, ParentType, ContextType>;
   resetPassword?: Resolver<
     Maybe<ResolversTypes['Message']>,
     ParentType,
@@ -615,6 +616,26 @@ export type MutationResolvers<
   >;
 }>;
 
+export type MutatorResolvers<
+  ContextType = Context,
+  ParentType extends ResolversParentTypes['Mutator'] = ResolversParentTypes['Mutator']
+> = ResolversObject<{
+  about?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isSuper?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  occupation?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  userActionsAsJson?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export interface PasswordScalarConfig
   extends GraphQLScalarTypeConfig<ResolversTypes['Password'], any> {
   name: 'Password';
@@ -624,6 +645,26 @@ export interface PositiveIntScalarConfig
   extends GraphQLScalarTypeConfig<ResolversTypes['PositiveInt'], any> {
   name: 'PositiveInt';
 }
+
+export type QuerierResolvers<
+  ContextType = Context,
+  ParentType extends ResolversParentTypes['Querier'] = ResolversParentTypes['Querier']
+> = ResolversObject<{
+  about?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isSuper?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  occupation?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  userActionsAsJson?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
 
 export type QueryResolvers<
   ContextType = Context,
@@ -665,7 +706,7 @@ export type QueryResolvers<
     ContextType,
     RequireFields<QueryListUsersArgs, never>
   >;
-  me?: Resolver<Maybe<ResolversTypes['Me']>, ParentType, ContextType>;
+  querier?: Resolver<Maybe<ResolversTypes['Querier']>, ParentType, ContextType>;
   refreshTokens?: Resolver<
     Maybe<ResolversTypes['Auth']>,
     ParentType,
@@ -761,7 +802,7 @@ export type _EntityResolvers<
   ContextType = Context,
   ParentType extends ResolversParentTypes['_Entity'] = ResolversParentTypes['_Entity']
 > = ResolversObject<{
-  __resolveType: TypeResolveFn<'Me', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'Mutator' | 'Querier', ParentType, ContextType>;
 }>;
 
 export type _ServiceResolvers<
@@ -777,11 +818,12 @@ export type Resolvers<ContextType = Context> = ResolversObject<{
   Authorization?: AuthorizationResolvers<ContextType>;
   Date?: GraphQLScalarType;
   EmailAddress?: GraphQLScalarType;
-  Me?: MeResolvers<ContextType>;
   Message?: MessageResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
+  Mutator?: MutatorResolvers<ContextType>;
   Password?: GraphQLScalarType;
   PositiveInt?: GraphQLScalarType;
+  Querier?: QuerierResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   RequiredString?: GraphQLScalarType;
   User?: UserResolvers<ContextType>;

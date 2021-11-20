@@ -39,7 +39,7 @@ const UserResolvers: Resolvers = {
     },
   },
   Mutation: {
-    invalidateUserAccess: async (_, {userId}, {req, dataSources}) => {
+    invalidateUserToken: async (_, {userId}, {req, dataSources}) => {
       const {user, auth} = dataSources;
 
       const accessToken = req.cookies.ACCESS_TOKEN;
@@ -49,7 +49,7 @@ const UserResolvers: Resolvers = {
         permission: 'update',
       });
 
-      const responseResult = await user.invalidateUserAccess(userId);
+      const responseResult = await user.invalidateUserToken(userId);
       return responseResult;
     },
     createUser: async (_, {input}, {req, dataSources}) => {

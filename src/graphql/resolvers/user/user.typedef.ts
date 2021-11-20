@@ -97,7 +97,7 @@ const USER_TYPES = gql`
   input ListUsersCollateInput {
     filter: UsersFilterInput
     sort: SortingByFieldInput
-    paginate: PaginationInput
+    page: PaginationInput
   }
 
   #

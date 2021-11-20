@@ -89,7 +89,10 @@ export default class AuthDataSource extends DataSource<Context> {
     }
 
     const authorizationResult = await callTryCatch<
-      IAuthorizationModel | null,
+      | (Omit<IAuthorizationModel, 'userActionsAsJson'> & {
+          actions?: UserAction[];
+        })
+      | null,
       Error
     >(async () =>
       AuthorizationDbModel.findOne({
@@ -102,15 +105,10 @@ export default class AuthDataSource extends DataSource<Context> {
       throw new AuthenticationError('Database error!', authorizationResult);
     }
 
-    const actions = ((authorizationResult?.actions || []) as UserAction[]).map(
-      (action) => ({name: action.name, permissions: action.permissions})
-    );
-
     const tokens = createToken({
       id: userAccount.id,
       isActive: !!userAccount.isActive,
       isSuper: !!userAccount.isSuper,
-      actions,
       verificationId: userAccount.verificationId || '',
     });
 
@@ -190,10 +188,13 @@ export default class AuthDataSource extends DataSource<Context> {
     ownedById?: string
   ) {
     const tokenPayload = await this.verifyAccessToken(accessToken || '');
+    const userAuthorization = await this.getUserAuthorization(
+      tokenPayload.data.id
+    );
 
     const userPermissions =
-      tokenPayload.data.actions.find(
-        (action) => action.name === requiredAction.modelName
+      userAuthorization.actions.find(
+        (action) => action?.name === requiredAction.modelName
       )?.permissions || [];
 
     const requiredPermission = userPermissions.find((permission) =>

@@ -40,13 +40,7 @@ bluebird.promisifyAll(Mongoose);
  */
 const initDbConnection = async () => {
   const connectionResult = await callTryCatch<Mongoose, Error>(() =>
-    connect(`mongodb://${DB_SERVER}:${DB_PORT}`, {
-      dbName: DB_NAME,
-      auth: {
-        password: DB_PASS,
-        username: DB_USER_NAME,
-      },
-    })
+    connect(`mongodb://${DB_USER_NAME}:${DB_PASS}@${DB_SERVER}:${DB_PORT}/${DB_NAME}?ssl=false`)
   );
 
   if (connectionResult instanceof Error) {

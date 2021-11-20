@@ -20,8 +20,6 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "cSpell.words": [
     "Dockerized",
-    "ahmedhameed",
-    "blogdb",
     "casify",
     "dataloader",
     "datasource",

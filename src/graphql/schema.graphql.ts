@@ -37,7 +37,7 @@ const typeDefs = gql`
     createTokens(input: AuthInput!): Auth
     refreshTokens: Auth
     clearTokens: Message
-    me: Me
+    querier: Querier
 
     #
     # ########################### Permissions queries ################################
@@ -58,12 +58,13 @@ const typeDefs = gql`
     """
     Set user access to forbidden. User in this case should reset their password to reactivate and change password.
     """
-    invalidateUserAccess(userId: ID!): Message
+    invalidateUserToken(userId: ID!): Message
 
     #
     # ########################### User mutation ################################
     #
     updateAuthorization(input: AuthorizationInput!): Authorization
+    mutator: Mutator
   }
 `;
 
