@@ -8,6 +8,17 @@ import {Resolvers} from '../../models/resolvers-types.model';
 const {MAIL_USER} = environment;
 
 const UserResolvers: Resolvers = {
+  User: {
+    __resolveReference: async (parent, {dataSources}) => {
+      const {user} = dataSources;
+      const usersData = await user.listUsers({
+        filter: {
+          id: [parent.id],
+        },
+      });
+      return usersData[0];
+    },
+  },
   Query: {
     getUser: async (_, {id}, {req, dataSources}) => {
       const {auth} = dataSources;

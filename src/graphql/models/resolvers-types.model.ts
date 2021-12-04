@@ -60,7 +60,7 @@ export type Authorization = {
   createdAt?: Maybe<Scalars['Date']>;
   id?: Maybe<Scalars['ID']>;
   updatedAt?: Maybe<Scalars['Date']>;
-  userId?: Maybe<Scalars['ID']>;
+  userId: Scalars['ID'];
 };
 
 export type AuthorizationInput = {
@@ -128,7 +128,6 @@ export type Mutator = {
   id: Scalars['ID'];
   isSuper?: Maybe<Scalars['Boolean']>;
   occupation?: Maybe<Scalars['String']>;
-  userActionsAsJson: Scalars['String'];
 };
 
 /**
@@ -151,7 +150,6 @@ export type Querier = {
   id: Scalars['ID'];
   isSuper?: Maybe<Scalars['Boolean']>;
   occupation?: Maybe<Scalars['String']>;
-  userActionsAsJson: Scalars['String'];
 };
 
 export type Query = {
@@ -225,7 +223,7 @@ export type User = {
   createdAt?: Maybe<Scalars['Date']>;
   email?: Maybe<Scalars['EmailAddress']>;
   gender?: Maybe<Scalars['String']>;
-  id?: Maybe<Scalars['ID']>;
+  id: Scalars['ID'];
   isActive?: Maybe<Scalars['Boolean']>;
   isSuper?: Maybe<Scalars['Boolean']>;
   name?: Maybe<Username>;
@@ -277,12 +275,12 @@ export type UsersFilterInput = {
   createAt?: Maybe<Scalars['String']>;
   email?: Maybe<Scalars['EmailAddress']>;
   gender?: Maybe<Scalars['String']>;
-  id?: Maybe<Scalars['ID']>;
+  id?: Maybe<Array<Maybe<Scalars['ID']>>>;
   name?: Maybe<UsernameInput>;
   updatedAt?: Maybe<Scalars['String']>;
 };
 
-export type _Entity = Mutator | Querier;
+export type _Entity = Authorization | Mutator | Querier | User;
 
 export type _Service = {
   __typename?: '_Service';
@@ -433,7 +431,11 @@ export type ResolversTypes = ResolversObject<{
   UsernameInput: UsernameInput;
   UsersFilterInput: UsersFilterInput;
   _Any: ResolverTypeWrapper<Scalars['_Any']>;
-  _Entity: ResolversTypes['Mutator'] | ResolversTypes['Querier'];
+  _Entity:
+    | ResolversTypes['Authorization']
+    | ResolversTypes['Mutator']
+    | ResolversTypes['Querier']
+    | ResolversTypes['User'];
   _Service: ResolverTypeWrapper<_Service>;
 }>;
 
@@ -471,7 +473,11 @@ export type ResolversParentTypes = ResolversObject<{
   UsernameInput: UsernameInput;
   UsersFilterInput: UsersFilterInput;
   _Any: Scalars['_Any'];
-  _Entity: ResolversParentTypes['Mutator'] | ResolversParentTypes['Querier'];
+  _Entity:
+    | ResolversParentTypes['Authorization']
+    | ResolversParentTypes['Mutator']
+    | ResolversParentTypes['Querier']
+    | ResolversParentTypes['User'];
   _Service: _Service;
 }>;
 
@@ -557,7 +563,7 @@ export type AuthorizationResolvers<
   createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
-  userId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
+  userId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -628,11 +634,6 @@ export type MutatorResolvers<
     ParentType,
     ContextType
   >;
-  userActionsAsJson?: Resolver<
-    ResolversTypes['String'],
-    ParentType,
-    ContextType
-  >;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -655,11 +656,6 @@ export type QuerierResolvers<
   isSuper?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   occupation?: Resolver<
     Maybe<ResolversTypes['String']>,
-    ParentType,
-    ContextType
-  >;
-  userActionsAsJson?: Resolver<
-    ResolversTypes['String'],
     ParentType,
     ContextType
   >;
@@ -741,7 +737,7 @@ export type UserResolvers<
     ContextType
   >;
   gender?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isActive?: Resolver<
     Maybe<ResolversTypes['Boolean']>,
     ParentType,
@@ -802,7 +798,11 @@ export type _EntityResolvers<
   ContextType = Context,
   ParentType extends ResolversParentTypes['_Entity'] = ResolversParentTypes['_Entity']
 > = ResolversObject<{
-  __resolveType: TypeResolveFn<'Mutator' | 'Querier', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<
+    'Authorization' | 'Mutator' | 'Querier' | 'User',
+    ParentType,
+    ContextType
+  >;
 }>;
 
 export type _ServiceResolvers<

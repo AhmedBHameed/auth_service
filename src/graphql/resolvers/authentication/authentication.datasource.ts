@@ -221,13 +221,12 @@ export default class AuthDataSource extends DataSource<Context> {
     const responseResult = await callTryCatch<
       IAuthorizationModel | null,
       Error
-    >(async () => AuthorizationDbModel.findOne({userId}));
-
+    >(async () => AuthorizationDbModel.findOne({userId: userId || ''}));
     if (responseResult instanceof Error)
       throw this.unknownError(responseResult);
 
     if (!responseResult) {
-      throw new ForbiddenError(`You don't have authorization!`);
+      throw new ForbiddenError(`Your don't have authorization!`);
     }
 
     return responseResult;
@@ -238,10 +237,10 @@ export default class AuthDataSource extends DataSource<Context> {
       async () => {
         const newUserAuthorization =
           await AuthorizationDbModel.findOneAndUpdate(
-            {userId: input.userId},
+            {userId: input.userId || ''},
             {
               id: ulid(),
-              userId: input.userId,
+              userId: input.userId || undefined,
               actions: input.actions,
             },
             {upsert: true, new: true}

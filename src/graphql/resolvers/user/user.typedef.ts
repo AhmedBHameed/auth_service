@@ -25,8 +25,8 @@ const USER_TYPES = gql`
   """
   User data model
   """
-  type User {
-    id: ID
+  type User @key(fields: "id") {
+    id: ID!
     name: Username
     email: EmailAddress
     avatar: String
@@ -34,8 +34,6 @@ const USER_TYPES = gql`
     authorizationId: ID
     isActive: Boolean
     isSuper: Boolean
-    # verificationId: String
-    # attemptOfResetPassword: String
     address: UserAddress
     createdAt: Date
     updatedAt: Date
@@ -54,7 +52,7 @@ const USER_TYPES = gql`
   Filtering configuration by fields.
   """
   input UsersFilterInput {
-    id: ID
+    id: [ID]
     email: EmailAddress
     name: UsernameInput
     gender: String

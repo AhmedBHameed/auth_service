@@ -30,25 +30,24 @@ const typeDefs = gql`
     message: String
   }
 
-  extend type Query {
+  type Query {
     #
     # ########################### Authentication queries ################################
     #
     createTokens(input: AuthInput!): Auth
     refreshTokens: Auth
     clearTokens: Message
-    querier: Querier
+    getUser(id: ID!): User
 
     #
     # ########################### Permissions queries ################################
     #
     getUserAuthorization(id: ID!): Authorization
-    getUser(id: ID!): User
     listUsers(input: ListUsersCollateInput): [User]
   }
 
   # MUTATIONS
-  extend type Mutation {
+  type Mutation {
     #
     # ########################### User mutation ################################
     #
@@ -64,6 +63,13 @@ const typeDefs = gql`
     # ########################### User mutation ################################
     #
     updateAuthorization(input: AuthorizationInput!): Authorization
+  }
+
+  type Query {
+    querier: Querier
+  }
+
+  extend type Mutation {
     mutator: Mutator
   }
 `;
@@ -85,9 +91,6 @@ const federatedSchema = buildSubgraphSchema([
       {EmailAddress: EmailAddressResolver},
       {RequiredString: requiredStringScalar},
       {PositiveInt: PositiveIntResolver},
-      {
-        VerifyToken: AuthenticationResolvers.VerifyToken,
-      },
       UserResolvers,
       AuthenticationResolvers,
     ]) as any,

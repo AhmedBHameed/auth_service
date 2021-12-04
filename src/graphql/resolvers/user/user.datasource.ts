@@ -12,6 +12,7 @@ import {
   Maybe,
   ResetPasswordInput,
   UpdateUserInput,
+  User,
 } from 'src/graphql/models';
 import {getSaltAndHashedPassword, redisClient} from 'src/services';
 import {callTryCatch} from 'src/util';
@@ -55,7 +56,7 @@ export default class UserDataSource extends DataSource {
       throw new ApolloError('User not found!');
     }
 
-    return responseResult as IUserModel & {verificationId: string};
+    return responseResult as unknown as User & {verificationId: string};
   }
 
   async listUsers(input?: Maybe<ListUsersCollateInput>) {
@@ -94,7 +95,7 @@ export default class UserDataSource extends DataSource {
       throw this.unknownError(responseResult);
     }
 
-    return responseResult;
+    return responseResult as User[];
   }
 
   async deleteUser(id: string) {
@@ -153,7 +154,7 @@ export default class UserDataSource extends DataSource {
         throw this.unknownError(responseResult);
     }
 
-    return responseResult as IUserModel & {verificationId: string};
+    return responseResult as unknown as User & {verificationId: string};
   }
 
   async updateUser(input: UpdateUserInput) {
@@ -177,7 +178,7 @@ export default class UserDataSource extends DataSource {
 
     if (!responseResult) throw new NotFoundError('User not found!');
 
-    return responseResult || {};
+    return responseResult as User;
   }
 
   async resetUserPassword(input: ResetPasswordInput) {
