@@ -30,7 +30,7 @@ const typeDefs = gql`
     message: String
   }
 
-  type Query {
+  extend type Query {
     #
     # ########################### Authentication queries ################################
     #
@@ -44,10 +44,12 @@ const typeDefs = gql`
     #
     getUserAuthorization(id: ID!): Authorization
     listUsers(input: ListUsersCollateInput): [User]
+
+    querier: Querier
   }
 
   # MUTATIONS
-  type Mutation {
+  extend type Mutation {
     #
     # ########################### User mutation ################################
     #
@@ -63,13 +65,7 @@ const typeDefs = gql`
     # ########################### User mutation ################################
     #
     updateAuthorization(input: AuthorizationInput!): Authorization
-  }
 
-  type Query {
-    querier: Querier
-  }
-
-  extend type Mutation {
     mutator: Mutator
   }
 `;
