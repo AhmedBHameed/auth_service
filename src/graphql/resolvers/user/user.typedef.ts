@@ -40,7 +40,7 @@ const USER_TYPES = gql`
   }
 
   #
-  # ################## List users ##################
+  # ######### List users ##################
   #
 
   input UsernameInput {
@@ -99,7 +99,7 @@ const USER_TYPES = gql`
   }
 
   #
-  # ################## Create user ##################
+  # ######### Create user ##################
   #
   input CreateUserInput {
     email: EmailAddress!
@@ -110,7 +110,7 @@ const USER_TYPES = gql`
   }
 
   #
-  # ################## Update user ##################
+  # ######### Update user ##################
   #
   input UpdateUserInput {
     id: ID!
@@ -120,7 +120,7 @@ const USER_TYPES = gql`
   }
 
   #
-  # ################## Reset user password ##################
+  # ######### Reset user password ##################
   #
   input ResetPasswordInput {
     verificationId: ID!

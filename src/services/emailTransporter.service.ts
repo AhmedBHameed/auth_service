@@ -1,7 +1,10 @@
 import {createTransport} from 'nodemailer';
-import environment from 'src/config/environment';
-
-const {MAIL_HOST, MAIL_PASS, MAIL_PORT, MAIL_USER} = environment;
+import {
+  MAIL_HOST,
+  MAIL_PASS,
+  MAIL_PORT,
+  MAIL_USER,
+} from 'src/config/environment';
 
 const transporter = createTransport({
   host: MAIL_HOST,

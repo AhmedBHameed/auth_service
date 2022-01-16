@@ -1,11 +1,13 @@
 import winston from 'winston';
 import Transport from 'winston-transport';
 
-import environment from '../config/environment';
+import {
+  IS_PRODUCTION,
+  WINSTON_LOG_DIR,
+  WINSTON_LOG_LEVEL,
+} from '../config/environment';
 
 export type Logger = winston.Logger;
-
-const {IS_PRODUCTION, WINSTON_LOG_DIR, WINSTON_LOG_LEVEL} = environment;
 
 const transports: Transport[] = [
   new winston.transports.File({

@@ -3,12 +3,10 @@ import {ApolloServer} from 'apollo-server-express';
 import {logger} from 'src/services';
 import {counter, histogram} from 'src/services/prometheus.service';
 
-import environment from '../config/environment';
+import {IS_PRODUCTION} from '../config/environment';
 import monitorPerformance from './plugins/monitorPerformance.plugin';
 import {AuthenticationDataSource, UserDataSource} from './resolvers';
 import schema from './schema.graphql';
-
-const {IS_PRODUCTION} = environment;
 
 const apolloServer = new ApolloServer({
   debug: !IS_PRODUCTION,

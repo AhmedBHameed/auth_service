@@ -1,10 +1,8 @@
 import Queue from 'bull';
 import {logger} from 'src/services';
 
-import environment from '../../config/environment';
+import {REDIS_HOST, REDIS_PASS, REDIS_PORT} from '../../config/environment';
 import mailingProcess from '../processes/mailing.process';
-
-const {REDIS_HOST, REDIS_PASS, REDIS_PORT} = environment;
 
 // Number of workers.
 export const concurrency = 2;

@@ -5,6 +5,7 @@ import {
 } from 'graphql';
 import {Context} from './context.model';
 export type Maybe<T> = T | null;
+export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends {[key: string]: unknown}> = {[K in keyof T]: T[K]};
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
   [SubKey in K]?: Maybe<T[SubKey]>;
@@ -52,6 +53,7 @@ export type Auth = {
 export type AuthInput = {
   email: Scalars['EmailAddress'];
   password: Scalars['Password'];
+  rememberMe?: InputMaybe<Scalars['Boolean']>;
 };
 
 export type Authorization = {
@@ -60,19 +62,19 @@ export type Authorization = {
   createdAt?: Maybe<Scalars['Date']>;
   id?: Maybe<Scalars['ID']>;
   updatedAt?: Maybe<Scalars['Date']>;
-  userId: Scalars['ID'];
+  userId?: Maybe<Scalars['ID']>;
 };
 
 export type AuthorizationInput = {
   actions: Array<ActionInput>;
-  userId?: Maybe<Scalars['ID']>;
+  userId?: InputMaybe<Scalars['ID']>;
 };
 
 export type CreateUserInput = {
-  avatar?: Maybe<Scalars['String']>;
+  avatar?: InputMaybe<Scalars['String']>;
   email: Scalars['EmailAddress'];
-  firstName?: Maybe<Scalars['String']>;
-  lastName?: Maybe<Scalars['String']>;
+  firstName?: InputMaybe<Scalars['String']>;
+  lastName?: InputMaybe<Scalars['String']>;
   password: Scalars['Password'];
 };
 
@@ -81,9 +83,9 @@ export type CreateUserInput = {
  * This configuration applied on queries with a prefixed name of `list*`
  */
 export type ListUsersCollateInput = {
-  filter?: Maybe<UsersFilterInput>;
-  page?: Maybe<PaginationInput>;
-  sort?: Maybe<SortingByFieldInput>;
+  filter?: InputMaybe<UsersFilterInput>;
+  page?: InputMaybe<PaginationInput>;
+  sort?: InputMaybe<SortingByFieldInput>;
 };
 
 export type Message = {
@@ -98,6 +100,7 @@ export type Mutation = {
   invalidateUserToken?: Maybe<Message>;
   mutator?: Maybe<Mutator>;
   resetPassword?: Maybe<Message>;
+  signup?: Maybe<Message>;
   updateAuthorization?: Maybe<Authorization>;
   updateUser?: Maybe<User>;
 };
@@ -114,6 +117,10 @@ export type MutationResetPasswordArgs = {
   input: ResetPasswordInput;
 };
 
+export type MutationSignupArgs = {
+  input: SignupInput;
+};
+
 export type MutationUpdateAuthorizationArgs = {
   input: AuthorizationInput;
 };
@@ -128,6 +135,7 @@ export type Mutator = {
   id: Scalars['ID'];
   isSuper?: Maybe<Scalars['Boolean']>;
   occupation?: Maybe<Scalars['String']>;
+  userActionsAsJson: Scalars['String'];
 };
 
 /**
@@ -150,6 +158,7 @@ export type Querier = {
   id: Scalars['ID'];
   isSuper?: Maybe<Scalars['Boolean']>;
   occupation?: Maybe<Scalars['String']>;
+  userActionsAsJson: Scalars['String'];
 };
 
 export type Query = {
@@ -163,6 +172,7 @@ export type Query = {
   listUsers?: Maybe<Array<Maybe<User>>>;
   querier?: Maybe<Querier>;
   refreshTokens?: Maybe<Auth>;
+  verifyMe?: Maybe<User>;
 };
 
 export type Query_EntitiesArgs = {
@@ -182,7 +192,7 @@ export type QueryGetUserAuthorizationArgs = {
 };
 
 export type QueryListUsersArgs = {
-  input?: Maybe<ListUsersCollateInput>;
+  input?: InputMaybe<ListUsersCollateInput>;
 };
 
 export type ResetPasswordInput = {
@@ -191,15 +201,22 @@ export type ResetPasswordInput = {
   verificationId: Scalars['ID'];
 };
 
+export type SignupInput = {
+  email: Scalars['EmailAddress'];
+  firstName: Scalars['String'];
+  lastName: Scalars['String'];
+  password: Scalars['Password'];
+};
+
 /** Single sorting configuration by field name and direction. An object of `key` `direction` properties is required when applying for sorting. */
 export type SortingByFieldInput = {
-  createdAt?: Maybe<SortingEnum>;
-  email?: Maybe<SortingEnum>;
-  firstName?: Maybe<SortingEnum>;
-  gender?: Maybe<SortingEnum>;
-  id?: Maybe<SortingEnum>;
-  lastName?: Maybe<SortingEnum>;
-  updatedAt?: Maybe<SortingEnum>;
+  createdAt?: InputMaybe<SortingEnum>;
+  email?: InputMaybe<SortingEnum>;
+  firstName?: InputMaybe<SortingEnum>;
+  gender?: InputMaybe<SortingEnum>;
+  id?: InputMaybe<SortingEnum>;
+  lastName?: InputMaybe<SortingEnum>;
+  updatedAt?: InputMaybe<SortingEnum>;
 };
 
 export enum SortingEnum {
@@ -208,10 +225,10 @@ export enum SortingEnum {
 }
 
 export type UpdateUserInput = {
-  avatar?: Maybe<Scalars['String']>;
-  firstName?: Maybe<Scalars['String']>;
+  avatar?: InputMaybe<Scalars['String']>;
+  firstName?: InputMaybe<Scalars['String']>;
   id: Scalars['ID'];
-  lastName?: Maybe<Scalars['String']>;
+  lastName?: InputMaybe<Scalars['String']>;
 };
 
 /** User data model */
@@ -256,31 +273,31 @@ export type Username = {
 };
 
 export type UsernameInput = {
-  first?: Maybe<Scalars['String']>;
-  last?: Maybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['String']>;
+  last?: InputMaybe<Scalars['String']>;
 };
 
 /** Filtering configuration by fields. */
 export type UsersFilterInput = {
-  _and?: Maybe<Array<Maybe<UsersFilterInput>>>;
-  _eq?: Maybe<UsersFilterInput>;
-  _gt?: Maybe<UsersFilterInput>;
-  _gte?: Maybe<UsersFilterInput>;
-  _in?: Maybe<Array<Maybe<UsersFilterInput>>>;
-  _lt?: Maybe<UsersFilterInput>;
-  _lte?: Maybe<UsersFilterInput>;
-  _neq?: Maybe<UsersFilterInput>;
-  _nin?: Maybe<Array<Maybe<UsersFilterInput>>>;
-  _or?: Maybe<Array<Maybe<UsersFilterInput>>>;
-  createAt?: Maybe<Scalars['String']>;
-  email?: Maybe<Scalars['EmailAddress']>;
-  gender?: Maybe<Scalars['String']>;
-  id?: Maybe<Array<Maybe<Scalars['ID']>>>;
-  name?: Maybe<UsernameInput>;
-  updatedAt?: Maybe<Scalars['String']>;
+  _and?: InputMaybe<Array<InputMaybe<UsersFilterInput>>>;
+  _eq?: InputMaybe<UsersFilterInput>;
+  _gt?: InputMaybe<UsersFilterInput>;
+  _gte?: InputMaybe<UsersFilterInput>;
+  _in?: InputMaybe<Array<InputMaybe<UsersFilterInput>>>;
+  _lt?: InputMaybe<UsersFilterInput>;
+  _lte?: InputMaybe<UsersFilterInput>;
+  _neq?: InputMaybe<UsersFilterInput>;
+  _nin?: InputMaybe<Array<InputMaybe<UsersFilterInput>>>;
+  _or?: InputMaybe<Array<InputMaybe<UsersFilterInput>>>;
+  createAt?: InputMaybe<Scalars['String']>;
+  email?: InputMaybe<Scalars['EmailAddress']>;
+  gender?: InputMaybe<Scalars['String']>;
+  id?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+  name?: InputMaybe<UsernameInput>;
+  updatedAt?: InputMaybe<Scalars['String']>;
 };
 
-export type _Entity = Authorization | Mutator | Querier | User;
+export type _Entity = Mutator | Querier | User;
 
 export type _Service = {
   __typename?: '_Service';
@@ -312,7 +329,7 @@ export type SubscriptionSubscribeFn<TResult, TParent, TContext, TArgs> = (
   args: TArgs,
   context: TContext,
   info: GraphQLResolveInfo
-) => AsyncIterator<TResult> | Promise<AsyncIterator<TResult>>;
+) => AsyncIterable<TResult> | Promise<AsyncIterable<TResult>>;
 
 export type SubscriptionResolveFn<TResult, TParent, TContext, TArgs> = (
   parent: TParent,
@@ -420,6 +437,7 @@ export type ResolversTypes = ResolversObject<{
   Query: ResolverTypeWrapper<{}>;
   RequiredString: ResolverTypeWrapper<Scalars['RequiredString']>;
   ResetPasswordInput: ResetPasswordInput;
+  SignupInput: SignupInput;
   SortingByFieldInput: SortingByFieldInput;
   SortingEnum: SortingEnum;
   String: ResolverTypeWrapper<Scalars['String']>;
@@ -432,7 +450,6 @@ export type ResolversTypes = ResolversObject<{
   UsersFilterInput: UsersFilterInput;
   _Any: ResolverTypeWrapper<Scalars['_Any']>;
   _Entity:
-    | ResolversTypes['Authorization']
     | ResolversTypes['Mutator']
     | ResolversTypes['Querier']
     | ResolversTypes['User'];
@@ -463,6 +480,7 @@ export type ResolversParentTypes = ResolversObject<{
   Query: {};
   RequiredString: Scalars['RequiredString'];
   ResetPasswordInput: ResetPasswordInput;
+  SignupInput: SignupInput;
   SortingByFieldInput: SortingByFieldInput;
   String: Scalars['String'];
   UpdateUserInput: UpdateUserInput;
@@ -474,7 +492,6 @@ export type ResolversParentTypes = ResolversObject<{
   UsersFilterInput: UsersFilterInput;
   _Any: Scalars['_Any'];
   _Entity:
-    | ResolversParentTypes['Authorization']
     | ResolversParentTypes['Mutator']
     | ResolversParentTypes['Querier']
     | ResolversParentTypes['User'];
@@ -563,7 +580,7 @@ export type AuthorizationResolvers<
   createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
-  userId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  userId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -608,6 +625,12 @@ export type MutationResolvers<
     ContextType,
     RequireFields<MutationResetPasswordArgs, 'input'>
   >;
+  signup?: Resolver<
+    Maybe<ResolversTypes['Message']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationSignupArgs, 'input'>
+  >;
   updateAuthorization?: Resolver<
     Maybe<ResolversTypes['Authorization']>,
     ParentType,
@@ -634,6 +657,11 @@ export type MutatorResolvers<
     ParentType,
     ContextType
   >;
+  userActionsAsJson?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -656,6 +684,11 @@ export type QuerierResolvers<
   isSuper?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   occupation?: Resolver<
     Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  userActionsAsJson?: Resolver<
+    ResolversTypes['String'],
     ParentType,
     ContextType
   >;
@@ -708,6 +741,7 @@ export type QueryResolvers<
     ParentType,
     ContextType
   >;
+  verifyMe?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
 }>;
 
 export interface RequiredStringScalarConfig
@@ -799,7 +833,7 @@ export type _EntityResolvers<
   ParentType extends ResolversParentTypes['_Entity'] = ResolversParentTypes['_Entity']
 > = ResolversObject<{
   __resolveType: TypeResolveFn<
-    'Authorization' | 'Mutator' | 'Querier' | 'User',
+    'Mutator' | 'Querier' | 'User',
     ParentType,
     ContextType
   >;

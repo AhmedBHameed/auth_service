@@ -4,7 +4,7 @@ import cookieParser from 'cookie-parser';
 import express from 'express';
 import helmet from 'helmet';
 import http from 'http';
-import environment from 'src/config/environment';
+import {SERVER_BASE_PATH, SERVER_PORT} from 'src/config/environment';
 import xss from 'src/middleware/cleanXss.middleware';
 import {connectRedis} from 'src/services';
 import {initLogger} from 'src/services/logger.service';
@@ -15,8 +15,6 @@ import changelogController from './Controller/changelog.controller';
 import apolloServer from './graphql/apolloServer.graphql';
 import initDbConnection from './services/mongoDbConnection.service';
 import {client} from './services/prometheus.service';
-
-const {SERVER_BASE_PATH, SERVER_PORT} = environment;
 
 (async () => {
   initLogger();

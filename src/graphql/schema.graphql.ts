@@ -32,15 +32,16 @@ const typeDefs = gql`
 
   extend type Query {
     #
-    # ########################### Authentication queries ################################
+    # ######### Authentication queries #########
     #
     createTokens(input: AuthInput!): Auth
     refreshTokens: Auth
     clearTokens: Message
+    verifyMe: User
     getUser(id: ID!): User
 
     #
-    # ########################### Permissions queries ################################
+    # ######### Permissions queries #########
     #
     getUserAuthorization(id: ID!): Authorization
     listUsers(input: ListUsersCollateInput): [User]
@@ -51,7 +52,12 @@ const typeDefs = gql`
   # MUTATIONS
   extend type Mutation {
     #
-    # ########################### User mutation ################################
+    # ######### Authentication mutation #########
+    #
+    signup(input: SignupInput!): Message
+
+    #
+    # ######### User mutation #########
     #
     createUser(input: CreateUserInput!): User
     updateUser(input: UpdateUserInput!): User
@@ -62,7 +68,7 @@ const typeDefs = gql`
     invalidateUserToken(userId: ID!): Message
 
     #
-    # ########################### User mutation ################################
+    # ######### User mutation #########
     #
     updateAuthorization(input: AuthorizationInput!): Authorization
 

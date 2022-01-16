@@ -13,6 +13,9 @@ const SERVER_PORT = process.env.SERVER_PORT || 5001;
 const SERVER_BASE_PATH = process.env.SERVER_BASE_PATH || '';
 const SERVER_ALLOWED_ORIGIN = process.env.SERVER_ALLOWED_ORIGIN;
 const PASS_PHRASE = process.env.PASS_PHRASE || '';
+const LOGO_SRC = `${
+  IS_PRODUCTION ? 'http://wwww.rocketdevs.com' : 'http://localhost:5500'
+}/blog/rocket_devs_logo.png`;
 
 /**
  * Database configuration
@@ -30,6 +33,7 @@ const MAIL_HOST = process.env.MAIL_HOST || '';
 const MAIL_PORT = process.env.MAIL_PORT;
 const MAIL_USER = process.env.MAIL_USER;
 const MAIL_PASS = process.env.MAIL_PASS;
+const APP_NAME = 'Rocket-Devs';
 
 /**
  * Redis configuration
@@ -49,7 +53,8 @@ const WINSTON_LOG_LEVEL = IS_PRODUCTION ? 'error' : 'debug';
  * */
 const BASE_API = IS_PRODUCTION ? '' : 'http://localhost';
 
-export default {
+export {
+  APP_NAME,
   APP_VERSION,
   BASE_API,
   DB_NAME,
@@ -58,6 +63,7 @@ export default {
   DB_SERVER,
   DB_USER_NAME,
   IS_PRODUCTION,
+  LOGO_SRC,
   MAIL_HOST,
   MAIL_PASS,
   MAIL_PORT,

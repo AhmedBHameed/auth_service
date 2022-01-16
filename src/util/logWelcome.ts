@@ -1,8 +1,6 @@
-import environment from 'src/config/environment';
+import {APP_VERSION, IS_PRODUCTION, SERVER_PORT} from 'src/config/environment';
 
 import showIp from './showIp';
-
-const {APP_VERSION, IS_PRODUCTION, SERVER_PORT} = environment;
 
 const IP = showIp()[0];
 

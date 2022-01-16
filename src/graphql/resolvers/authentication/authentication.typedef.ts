@@ -2,11 +2,12 @@ import {gql} from 'apollo-server-core';
 
 const AUTHENTICATION_TYPES = gql`
   #
-  # ################## Authentication input model ##################
+  # ######### Authentication input model #########
   #
   input AuthInput {
     email: EmailAddress!
     password: Password!
+    rememberMe: Boolean
   }
 
   """
@@ -20,7 +21,7 @@ const AUTHENTICATION_TYPES = gql`
   }
 
   #
-  # ################## Authorization input model ##################
+  # ######### Authorization input model #########
   #
   type UserAction {
     name: String
@@ -52,7 +53,17 @@ const AUTHENTICATION_TYPES = gql`
   }
 
   #
-  # ################## Update authorization ##################
+  # ######### Signup #########
+  #
+  input SignupInput {
+    email: EmailAddress!
+    password: Password!
+    firstName: String!
+    lastName: String!
+  }
+
+  #
+  # ######### Update authorization #########
   #
   input ActionInput {
     name: RequiredString!

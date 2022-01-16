@@ -56,7 +56,7 @@ export default class AuthDataSource extends DataSource<Context> {
   /**
    * ####################### Authentication methods #######################
    */
-  async createTokens(input: AuthInput) {
+  async createTokens(input: AuthInput, rememberMe: Maybe<boolean> = true) {
     const responseResult = await callTryCatch<IUserModel | null, Error>(
       async () =>
         UserDbModel.findOne({
@@ -105,12 +105,15 @@ export default class AuthDataSource extends DataSource<Context> {
       throw new AuthenticationError('Database error!', authorizationResult);
     }
 
-    const tokens = createToken({
-      id: userAccount.id,
-      isActive: !!userAccount.isActive,
-      isSuper: !!userAccount.isSuper,
-      verificationId: userAccount.verificationId || '',
-    });
+    const tokens = createToken(
+      {
+        id: userAccount.id,
+        isActive: !!userAccount.isActive,
+        isSuper: !!userAccount.isSuper,
+        verificationId: userAccount.verificationId || '',
+      },
+      rememberMe
+    );
 
     return tokens;
   }
@@ -166,7 +169,7 @@ export default class AuthDataSource extends DataSource<Context> {
     const verificationResult = await this.verifyRefreshToken(refreshToken);
 
     const tokenPayload = verificationResult.data;
-    const tokens = createToken(tokenPayload);
+    const tokens = createToken(tokenPayload, true);
 
     return {payload: tokenPayload, tokens};
   }

@@ -1,9 +1,13 @@
 import {Seeder} from 'mongo-seeding';
 import path from 'path';
 
-import environment from './config/environment';
-
-const {DB_NAME, DB_PASS, DB_PORT, DB_SERVER, DB_USER_NAME} = environment;
+import {
+  DB_NAME,
+  DB_PASS,
+  DB_PORT,
+  DB_SERVER,
+  DB_USER_NAME,
+} from './config/environment';
 
 const seeder = new Seeder({
   database: {

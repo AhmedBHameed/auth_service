@@ -2,10 +2,14 @@ import bluebird from 'bluebird';
 import {connect, Mongoose} from 'mongoose';
 import {callTryCatch} from 'src/util';
 
-import environment from '../config/environment';
+import {
+  DB_NAME,
+  DB_PASS,
+  DB_PORT,
+  DB_SERVER,
+  DB_USER_NAME,
+} from '../config/environment';
 import {logger} from './logger.service';
-
-const {DB_NAME, DB_PASS, DB_PORT, DB_SERVER, DB_USER_NAME} = environment;
 
 bluebird.promisifyAll(Mongoose);
 
@@ -40,7 +44,9 @@ bluebird.promisifyAll(Mongoose);
  */
 const initDbConnection = async () => {
   const connectionResult = await callTryCatch<Mongoose, Error>(() =>
-    connect(`mongodb://${DB_USER_NAME}:${DB_PASS}@${DB_SERVER}:${DB_PORT}/${DB_NAME}?ssl=false`)
+    connect(
+      `mongodb://${DB_USER_NAME}:${DB_PASS}@${DB_SERVER}:${DB_PORT}/${DB_NAME}?ssl=false`
+    )
   );
 
   if (connectionResult instanceof Error) {

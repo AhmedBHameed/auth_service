@@ -9,6 +9,7 @@ const activateUserAccountController = (_: Request, res: Response): void => {
   const html = hbs.compile(template);
   res.send(
     html({
+      logoSrc: 'http://localhost:5500/blog/rocket_devs_logo.png',
       baseUrl: 'https://www.google.com',
       verificationId: 'ABC123',
       email: 'ahmedbazy@gmail.com',

@@ -1,11 +1,9 @@
-import environment from 'src/config/environment';
+import {MAIL_USER} from 'src/config/environment';
 import {mailingQueue} from 'src/jobs/queues/mailing.queue';
 import renderTemplate from 'src/services/renderTemplate.service';
 import {ulid} from 'ulid';
 
 import {Resolvers} from '../../models/resolvers-types.model';
-
-const {MAIL_USER} = environment;
 
 const UserResolvers: Resolvers = {
   User: {

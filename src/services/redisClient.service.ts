@@ -1,7 +1,5 @@
 import RedisClass, {Redis} from 'ioredis';
-import environment from 'src/config/environment';
-
-const {REDIS_HOST, REDIS_PASS, REDIS_PORT} = environment;
+import {REDIS_HOST, REDIS_PASS, REDIS_PORT} from 'src/config/environment';
 
 // eslint-disable-next-line import/no-mutable-exports
 let redisClient: Redis;

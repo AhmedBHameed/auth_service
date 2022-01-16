@@ -7,10 +7,10 @@ import {
   TokenExpiredError,
   verify,
 } from 'jsonwebtoken';
-import {} from 'src/graphql/models';
+import {Maybe} from 'src/graphql/models';
 import {ulid} from 'ulid';
 
-import environment from '../config/environment';
+import {PASS_PHRASE} from '../config/environment';
 
 /**
  * To Generate private and public keys @see https://rietta.com/blog/openssl-generating-rsa-key-from-command/
@@ -33,8 +33,6 @@ export interface ParseTokenData {
 }
 
 type SSLKey = string;
-
-const {PASS_PHRASE} = environment;
 
 const PRIVATE_KEY: SSLKey = readFileSync('keys/private.pem', 'utf8');
 const PUBLIC_KEY: SSLKey = readFileSync('keys/public.pem', 'utf8');
@@ -65,7 +63,8 @@ const verifyToken = (token: string): ParseTokenData =>
   }) as ParseTokenData;
 
 const createToken = (
-  payload: JWTPayload
+  payload: JWTPayload,
+  rememberMe: Maybe<boolean>
 ): {
   accessToken: string;
   refreshToken: string;
@@ -109,9 +108,9 @@ const createToken = (
       }
     ),
     // accessTokenExpire 15 minutes
-    accessTokenExpire: 15 * 60 * 1000,
+    accessTokenExpire: rememberMe ? 15 * 60 * 1000 : -1,
     // refreshTokenExpire 7 days
-    refreshTokenExpire: 24 * 60 * 60 * 1000 * 7,
+    refreshTokenExpire: rememberMe ? 24 * 60 * 60 * 1000 * 7 : -1,
   };
 };
 
