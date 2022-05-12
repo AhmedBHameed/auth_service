@@ -61,6 +61,8 @@ const BASE_API = IS_PRODUCTION ? '' : 'http://localhost';
 const GITHUB_CLIENT_ID = process.env.GH_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GH_CLIENT_SECRET;
 
+console.log("===>>", DB_PASS)
+
 export {
   APP_NAME,
   APP_VERSION,
