@@ -29,6 +29,18 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+        env:
+          env:
+            DB_NAME: ${{ secrets.DB_NAME }}
+            DB_PASS: ${{ secrets.DB_PASS }}
+            DB_USER_NAME: ${{ secrets.DB_USER_NAME }}
+            GH_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
+            GH_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET }}
+            MAIL_HOST: ${{ secrets.MAIL_HOST }}
+            MAIL_PASS: ${{ secrets.MAIL_PASS }}
+            MAIL_PORT: ${{ secrets.MAIL_PORT }}
+            MAIL_USER: ${{ secrets.MAIL_USER }}
+            PASS_PHRASE: ${{ secrets.PASS_PHRASE }}
       - run: yarn
       - run: yarn build
       # - run: yarn test

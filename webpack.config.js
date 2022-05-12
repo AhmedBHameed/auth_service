@@ -8,9 +8,18 @@ const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const APP_DIR = path.resolve(__dirname, './src');
 const BUILD_DIR = path.resolve(__dirname, './build');
 
+
+const plugins = [
+  new ESLintPlugin(),
+  new CleanWebpackPlugin(),
+  new NodemonPlugin(),
+];
+
 function buildConfig(_, argv) {
   const isProd = argv.mode === 'production';
   const BUILD_ENV = isProd ? 'production' : 'development';
+  
+  if(!isProd) plugins.push(new Dotenv({safe: true, allowEmptyValues: true}));
 
   return {
     entry: {
@@ -31,12 +40,7 @@ function buildConfig(_, argv) {
         src: APP_DIR,
       },
     },
-    plugins: [
-      new Dotenv({safe: true, allowEmptyValues: true}),
-      new ESLintPlugin(),
-      new CleanWebpackPlugin(),
-      new NodemonPlugin(),
-    ],
+    plugins,
     module: {
       rules: [
         {
