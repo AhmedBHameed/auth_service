@@ -8,6 +8,9 @@ import monitorPerformance from './plugins/monitorPerformance.plugin';
 import {AuthenticationDataSource, UserDataSource} from './resolvers';
 import schema from './schema.graphql';
 
+const plugins = [monitorPerformance]
+if(!IS_PRODUCTION) plugins.push(ApolloServerPluginLandingPageGraphQLPlayground());
+
 const apolloServer = new ApolloServer({
   debug: !IS_PRODUCTION,
   introspection: !IS_PRODUCTION, // Disable Graphql playground on production.
@@ -16,10 +19,7 @@ const apolloServer = new ApolloServer({
     logger.error(graphqlError);
     return graphqlError;
   },
-  plugins: [
-    monitorPerformance,
-    ApolloServerPluginLandingPageGraphQLPlayground(),
-  ],
+  plugins,
   dataSources: () => ({
     user: new UserDataSource(),
     auth: new AuthenticationDataSource(),

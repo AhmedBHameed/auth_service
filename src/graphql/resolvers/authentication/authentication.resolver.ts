@@ -1,5 +1,10 @@
 import {SendMailOptions} from 'nodemailer';
-import {APP_NAME, LOGO_SRC, MAIL_USER} from 'src/config/environment';
+import {
+  APP_NAME,
+  LOGO_SRC,
+  MAIL_USER,
+  SERVER_DOMAIN,
+} from 'src/config/environment';
 import {mailingQueue} from 'src/jobs/queues/mailing.queue';
 import renderTemplate from 'src/services/renderTemplate.service';
 import {ulid} from 'ulid';
@@ -29,6 +34,17 @@ const AuthenticationResolvers: Resolvers = {
     actions: async ({actions}) => actions || [],
   },
   Query: {
+    githubLogin: async (_, {code}, {dataSources}) => {
+      const {auth} = dataSources;
+
+      const accessToken = await auth.createGithubTokens(code);
+
+      const data = await auth.verifyGithubAccessToken(accessToken);
+
+      const tokens = await auth.createSocialMediaToken(data);
+
+      return tokens;
+    },
     verifyMe: async (_, __, {req, dataSources}) => {
       const {auth, user} = dataSources;
       const accessToken = req.cookies.ACCESS_TOKEN;
@@ -81,7 +97,7 @@ const AuthenticationResolvers: Resolvers = {
         {
           html: renderTemplate('views/activate-user-account.hbs', {
             logoSrc: LOGO_SRC,
-            baseUrl: 'https://www.google.com',
+            baseUrl: SERVER_DOMAIN,
             verificationId: newUserResult.verificationId,
             email: newUserResult.email,
           }),

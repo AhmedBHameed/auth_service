@@ -10,6 +10,7 @@ import {
   AuthenticationError,
   ForbiddenError,
 } from 'apollo-server-core';
+import {GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET} from 'src/config/environment';
 import {
   AuthInput,
   AuthorizationInput,
@@ -17,6 +18,7 @@ import {
   Maybe,
   UserAction,
 } from 'src/graphql/models';
+import {GithubUserDataModel} from 'src/graphql/models/GithubUserDataModel';
 import {
   createToken,
   JsonWebTokenError,
@@ -26,6 +28,7 @@ import {
   verifiedPassword,
   verifyToken,
 } from 'src/services';
+import {httpClient} from 'src/services/httpClient';
 import {logger} from 'src/services/logger.service';
 import {callTryCatch} from 'src/util';
 import {ulid} from 'ulid';
@@ -258,6 +261,118 @@ export default class AuthDataSource extends DataSource<Context> {
       throw this.unknownError(responseResult);
 
     return responseResult;
+  }
+
+  // ####################### Github OAuth methods #######################
+
+  async createGithubTokens(githubCode: string) {
+    const endpoint = 'https://github.com/login/oauth/access_token';
+
+    const result = await httpClient.post(
+      endpoint,
+      {
+        client_id: GITHUB_CLIENT_ID,
+        client_secret: GITHUB_CLIENT_SECRET,
+        code: githubCode,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+      }
+    );
+
+    if (result.data.error)
+      throw new AuthenticationError(result.data.error_description);
+
+    /**
+       * ERROR: {
+            error: 'bad_verification_code',
+            error_description: 'The code passed is incorrect or expired.',
+            error_uri: 'https://docs.github.com/apps/managing-oauth-apps/troubleshooting-oauth-app-access-token-request-errors/#bad-verification-code'
+          }
+
+          SUCCESS:
+
+          {
+             access_token: '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',
+             token_type: 'bearer',
+             scope: 'user'
+          }
+
+
+       */
+    return result.data.access_token;
+  }
+
+  async verifyGithubAccessToken(githubToken: string) {
+    const endpoint = `https://api.github.com/user`;
+
+    try {
+      const result = await httpClient.post(endpoint, undefined, {
+        headers: {
+          Authorization: `bearer ${githubToken}`,
+        },
+      });
+
+      return result.data as GithubUserDataModel;
+    } catch (error) {
+      throw new AuthenticationError((error as any).response?.data?.message);
+    }
+  }
+
+  async createSocialMediaToken(githubUserData: GithubUserDataModel) {
+    const responseResult = await callTryCatch<IUserModel | null, Error>(
+      async () =>
+        UserDbModel.findOneAndUpdate(
+          {socialMediaId: githubUserData.id},
+          {
+            id: ulid(),
+            socialMediaId: githubUserData.id,
+            email: githubUserData.email,
+            name: {
+              first: githubUserData.name,
+            },
+            avatar: githubUserData.avatar_url,
+            isActive: true,
+            isSuper: false,
+            verificationId: ulid(),
+            about: githubUserData.bio,
+            githubUrl: githubUserData.html_url,
+            address: {
+              state: githubUserData.location,
+            },
+          },
+          {upsert: true, new: true}
+        )
+    );
+
+    if (responseResult instanceof Error) {
+      logger.error(responseResult);
+      throw new AuthenticationError('Database error!');
+    }
+
+    if (!responseResult) {
+      throw new ApolloError('User not found!');
+    }
+
+    const userAccount = responseResult as IUserModel & {
+      password: string;
+      verificationId: string;
+    };
+
+    const tokens = createToken(
+      {
+        id: userAccount.id,
+        isActive: !!userAccount.isActive,
+        isSuper: !!userAccount.isSuper,
+        verificationId: userAccount.verificationId || '',
+      },
+      true
+    );
+
+    return tokens;
   }
 
   unknownError(responseResult?: any) {

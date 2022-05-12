@@ -13,9 +13,9 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
   [SubKey in K]: Maybe<T[SubKey]>;
 };
-export type RequireFields<T, K extends keyof T> = {
-  [X in Exclude<keyof T, K>]?: T[X];
-} & {[P in K]-?: NonNullable<T[P]>};
+export type RequireFields<T, K extends keyof T> = Omit<T, K> & {
+  [P in K]-?: NonNullable<T[P]>;
+};
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -96,6 +96,7 @@ export type Message = {
 export type Mutation = {
   __typename?: 'Mutation';
   createUser?: Maybe<User>;
+  forgotPassword?: Maybe<Message>;
   /** Set user access to forbidden. User in this case should reset their password to reactivate and change password. */
   invalidateUserToken?: Maybe<Message>;
   mutator?: Maybe<Mutator>;
@@ -107,6 +108,10 @@ export type Mutation = {
 
 export type MutationCreateUserArgs = {
   input: CreateUserInput;
+};
+
+export type MutationForgotPasswordArgs = {
+  email: Scalars['EmailAddress'];
 };
 
 export type MutationInvalidateUserTokenArgs = {
@@ -169,6 +174,7 @@ export type Query = {
   createTokens?: Maybe<Auth>;
   getUser?: Maybe<User>;
   getUserAuthorization?: Maybe<Authorization>;
+  githubLogin?: Maybe<Auth>;
   listUsers?: Maybe<Array<Maybe<User>>>;
   querier?: Maybe<Querier>;
   refreshTokens?: Maybe<Auth>;
@@ -189,6 +195,10 @@ export type QueryGetUserArgs = {
 
 export type QueryGetUserAuthorizationArgs = {
   id: Scalars['ID'];
+};
+
+export type QueryGithubLoginArgs = {
+  code: Scalars['ID'];
 };
 
 export type QueryListUsersArgs = {
@@ -234,12 +244,14 @@ export type UpdateUserInput = {
 /** User data model */
 export type User = {
   __typename?: 'User';
+  about?: Maybe<Scalars['String']>;
   address?: Maybe<UserAddress>;
-  authorizationId?: Maybe<Scalars['ID']>;
+  authorization?: Maybe<Authorization>;
   avatar?: Maybe<Scalars['String']>;
   createdAt?: Maybe<Scalars['Date']>;
   email?: Maybe<Scalars['EmailAddress']>;
   gender?: Maybe<Scalars['String']>;
+  githubUrl?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   isActive?: Maybe<Scalars['Boolean']>;
   isSuper?: Maybe<Scalars['Boolean']>;
@@ -612,6 +624,12 @@ export type MutationResolvers<
     ContextType,
     RequireFields<MutationCreateUserArgs, 'input'>
   >;
+  forgotPassword?: Resolver<
+    Maybe<ResolversTypes['Message']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationForgotPasswordArgs, 'email'>
+  >;
   invalidateUserToken?: Resolver<
     Maybe<ResolversTypes['Message']>,
     ParentType,
@@ -729,11 +747,17 @@ export type QueryResolvers<
     ContextType,
     RequireFields<QueryGetUserAuthorizationArgs, 'id'>
   >;
+  githubLogin?: Resolver<
+    Maybe<ResolversTypes['Auth']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryGithubLoginArgs, 'code'>
+  >;
   listUsers?: Resolver<
     Maybe<Array<Maybe<ResolversTypes['User']>>>,
     ParentType,
     ContextType,
-    RequireFields<QueryListUsersArgs, never>
+    Partial<QueryListUsersArgs>
   >;
   querier?: Resolver<Maybe<ResolversTypes['Querier']>, ParentType, ContextType>;
   refreshTokens?: Resolver<
@@ -753,13 +777,14 @@ export type UserResolvers<
   ContextType = Context,
   ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']
 > = ResolversObject<{
+  about?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   address?: Resolver<
     Maybe<ResolversTypes['UserAddress']>,
     ParentType,
     ContextType
   >;
-  authorizationId?: Resolver<
-    Maybe<ResolversTypes['ID']>,
+  authorization?: Resolver<
+    Maybe<ResolversTypes['Authorization']>,
     ParentType,
     ContextType
   >;
@@ -771,6 +796,11 @@ export type UserResolvers<
     ContextType
   >;
   gender?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  githubUrl?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isActive?: Resolver<
     Maybe<ResolversTypes['Boolean']>,

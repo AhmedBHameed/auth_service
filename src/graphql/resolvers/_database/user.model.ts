@@ -2,7 +2,9 @@ import {Document, model, Schema} from 'mongoose';
 import {User} from 'src/graphql/models';
 import {getUTCTime} from 'src/util';
 
-export interface IUserModel extends Omit<User, 'id'>, Document {}
+export interface IUserModel
+  extends Omit<User & {verificationId: string}, 'id'>,
+    Document {}
 
 const UserSchema = new Schema(
   {
@@ -22,8 +24,9 @@ const UserSchema = new Schema(
       default: false,
       required: true,
     },
+    socialMediaId: {type: String, default: ''},
+    githubUrl: {type: String, default: ''},
     gender: {type: String, default: ''},
-    authorizationId: {type: String, default: ''},
     verificationId: {type: String, default: ''},
     attemptOfResetPassword: {type: Number, default: 0},
     address: {
@@ -38,8 +41,8 @@ const UserSchema = new Schema(
       },
       default: null,
     },
-    occupation: {type: String, default: ""},
-    about: {type: String, default: ""}
+    occupation: {type: String, default: ''},
+    about: {type: String, default: ''},
   },
   {timestamps: true}
 );

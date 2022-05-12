@@ -1,4 +1,4 @@
-import {MAIL_USER} from 'src/config/environment';
+import {MAIL_USER, SERVER_DOMAIN} from 'src/config/environment';
 import {mailingQueue} from 'src/jobs/queues/mailing.queue';
 import renderTemplate from 'src/services/renderTemplate.service';
 import {ulid} from 'ulid';
@@ -15,6 +15,16 @@ const UserResolvers: Resolvers = {
         },
       });
       return usersData[0];
+    },
+    authorization: async (parent, _, {req, dataSources}) => {
+      const {auth} = dataSources;
+      const accessToken = req.cookies.ACCESS_TOKEN;
+
+      const {data} = await auth.verifyAccessToken(accessToken);
+
+      const userPermission = await auth.getUserAuthorization(data.id);
+
+      return userPermission;
     },
   },
   Query: {
@@ -75,7 +85,7 @@ const UserResolvers: Resolvers = {
       await mailingQueue.add(
         {
           html: renderTemplate('views/activate-user-account.hbs', {
-            baseUrl: 'https://www.google.com',
+            baseUrl: SERVER_DOMAIN,
             verificationId: newUserResult.verificationId,
             email: newUserResult.email,
           }),
@@ -102,23 +112,12 @@ const UserResolvers: Resolvers = {
       });
 
       const updateResult = await user.updateUser(input);
-
-      await mailingQueue.add(
-        {
-          html: `
-            <h1>Your user has been updated successfully</h1>`,
-          from: MAIL_USER,
-          to: updateResult.email,
-          subject: 'ahmedhameed.dev - User updated',
-        },
-        {
-          jobId: ulid(),
-          delay: 5000,
-          attempts: 2,
-        }
-      );
-
       return updateResult;
+    },
+    forgotPassword: async (_, {email}, {dataSources}) => {
+      const {user} = dataSources;
+      const responseResult = await user.forgotUserPassword(email);
+      return responseResult;
     },
     resetPassword: async (_, {input}, {dataSources}) => {
       const {user} = dataSources;

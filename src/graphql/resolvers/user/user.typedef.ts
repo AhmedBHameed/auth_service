@@ -31,7 +31,9 @@ const USER_TYPES = gql`
     email: EmailAddress
     avatar: String
     gender: String
-    authorizationId: ID
+    authorization: Authorization
+    about: String
+    githubUrl: String
     isActive: Boolean
     isSuper: Boolean
     address: UserAddress

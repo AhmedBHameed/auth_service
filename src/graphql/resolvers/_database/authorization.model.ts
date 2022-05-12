@@ -10,12 +10,15 @@ const AuthorizationModel = new Schema(
   {
     id: {type: String, required: true, unique: true},
     userId: {type: String, required: true, unique: true},
-    actions: [
-      {
-        name: {type: String, required: true},
-        permissions: {type: [String], required: true},
-      },
-    ],
+    actions: {
+      type: [
+        {
+          name: {type: String, required: true},
+          permissions: {type: [String], required: true},
+        },
+      ],
+      default: [],
+    },
   },
   {timestamps: true}
 );

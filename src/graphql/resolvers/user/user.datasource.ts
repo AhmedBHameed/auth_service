@@ -6,6 +6,13 @@
 // import DataLoader from 'dataloader'
 import {DataSource} from 'apollo-datasource';
 import {ApolloError, AuthenticationError} from 'apollo-server-core';
+import {SendMailOptions} from 'nodemailer';
+import {
+  APP_NAME,
+  LOGO_SRC,
+  MAIL_USER,
+  SERVER_DOMAIN,
+} from 'src/config/environment';
 import {
   CreateUserInput,
   ListUsersCollateInput,
@@ -14,7 +21,9 @@ import {
   UpdateUserInput,
   User,
 } from 'src/graphql/models';
+import {mailingQueue} from 'src/jobs/queues/mailing.queue';
 import {getSaltAndHashedPassword, redisClient} from 'src/services';
+import renderTemplate from 'src/services/renderTemplate.service';
 import {callTryCatch} from 'src/util';
 import {ulid} from 'ulid';
 
@@ -178,6 +187,22 @@ export default class UserDataSource extends DataSource {
 
     if (!responseResult) throw new NotFoundError('User not found!');
 
+    // ! TODO: Create user has been updated successfully page
+    await mailingQueue.add(
+      {
+        html: `
+          <h1>Your user has been updated successfully</h1>`,
+        from: MAIL_USER,
+        to: responseResult.email,
+        subject: `${APP_NAME} - User has been updated!`,
+      } as SendMailOptions,
+      {
+        jobId: ulid(),
+        delay: 5000,
+        attempts: 2,
+      }
+    );
+
     return responseResult as User;
   }
 
@@ -206,6 +231,47 @@ export default class UserDataSource extends DataSource {
     };
   }
 
+  async forgotUserPassword(email: string) {
+    const responseResult = await UserDbModel.findOneAndUpdate(
+      {
+        email,
+      },
+      {
+        verificationId: ulid(),
+      },
+      {new: true}
+    );
+
+    if (responseResult instanceof Error)
+      throw this.unknownError(responseResult);
+
+    if (!responseResult) throw new NotFoundError('User not found!');
+
+    await mailingQueue.add(
+      {
+        html: renderTemplate('views/activate-user-account.hbs', {
+          logoSrc: LOGO_SRC,
+          baseUrl: SERVER_DOMAIN,
+          verificationId: responseResult.verificationId,
+          email: responseResult.email,
+        }),
+        from: MAIL_USER,
+        to: email,
+        subject: `${APP_NAME} - Forgot Password!`,
+      } as SendMailOptions,
+      {
+        jobId: ulid(),
+        delay: 5000, // 1 min in ms
+        attempts: 2,
+      }
+    );
+
+    return {
+      message:
+        'If your email is registered, we sent you an email to reset your password.',
+    };
+  }
+
   // Required when we need to invalidate user token.
   async checkUserVerificationId(userId: string, verificationId: string) {
     const userResult = (await this.getUserById(userId)) as IUserModel & {
@@ -220,7 +286,7 @@ export default class UserDataSource extends DataSource {
     await redisClient.set(
       `${USER_IDENTIFIER_KEY}:${userId}:${userData.verificationId}`,
       'access_forbidden',
-      'ex',
+      'EX',
       60 * 60 * 24 * 7 // Expire for 7 days till reset password attempt.
     );
 
@@ -244,6 +310,7 @@ export default class UserDataSource extends DataSource {
   }
 
   // Errors
+
   throwAuthenticationError(responseResult?: any) {
     throw new AuthenticationError('Unauthenticated call', responseResult);
   }

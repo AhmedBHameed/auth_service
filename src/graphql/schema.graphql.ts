@@ -35,6 +35,7 @@ const typeDefs = gql`
     # ######### Authentication queries #########
     #
     createTokens(input: AuthInput!): Auth
+    githubLogin(code: ID!): Auth
     refreshTokens: Auth
     clearTokens: Message
     verifyMe: User
@@ -61,6 +62,7 @@ const typeDefs = gql`
     #
     createUser(input: CreateUserInput!): User
     updateUser(input: UpdateUserInput!): User
+    forgotPassword(email: EmailAddress!): Message
     resetPassword(input: ResetPasswordInput!): Message
     """
     Set user access to forbidden. User in this case should reset their password to reactivate and change password.
