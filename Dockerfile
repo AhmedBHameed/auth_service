@@ -8,9 +8,9 @@ RUN mkdir -p /home/node/auth_service && chown -R node:node /home/node/auth_servi
 RUN mkdir -p /home/node/auth_service/build && chown -R node:node /home/node/auth_service/build
 WORKDIR /home/node/auth_service
 
-COPY ./package*.json ./
+COPY ./auth_service/package*.json ./
 
 RUN npm install
-COPY --chown=node:node . ./
+COPY --chown=node:node ./auth_service ./
 
-COPY ./ .
+COPY ./auth_service .

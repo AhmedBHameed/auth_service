@@ -1,21 +1,22 @@
-version: "3.4"
+version: '3.4'
 
 networks:
   xentral:
     driver: bridge
 
 services:
-  core:
-    hostname: core
-    container_name: core
+  auth_service:
+    hostname: auth_service
+    container_name: auth_service
+    command: ["yarn", "start"]
     build:
       context: .
       dockerfile: ./Dockerfile
-    command: ["yarn", "dev"]
+    restart: always
     volumes:
-      - .:/home/node/auth_service
-      - /home/node/auth_service/node_modules
+      - ./auth_service/node_modules:/home/node/auth_service/node_modules
+      - ./auth_service:/home/node/auth_service
     ports:
-      - "9000:9000"
+      - "5001:5001"
     networks:
       - starlink
