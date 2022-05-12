@@ -24,60 +24,14 @@ jobs:
         node-version: [12.x]
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
         with:
-          node-version: ${{ matrix.node-version }}
-      # - run: yarn
-      # - run: yarn build
-      # - run: yarn test
+          key: {%- raw -%} ${{ secrets.SSH_PRIVATE_KEY }} {% endraw %}
+          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
 
-      - name: Deploy to server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          password: ${{ secrets.SERVER_PASSWORD }}
-          script: |
-            cd ${{ secrets.PROJECT_PATH }}
-            git pull origin main
-            export NVM_DIR=~/.nvm
-            source ~/.nvm/nvm.sh
-            echo "🛫 Building application"
-            npm install
-            MONGODB_PASS=${{ secrets.MONGODB_PASS }} SECRET=${{ secrets.SECRET }} npm run build
-            cd ..
-            echo "🔄 Shutdown docker container ..."
-            sudo docker-compose -f docker-compose.prod.yml stop
-            echo "🚀 Starting docker container ..."
-            sudo docker-compose -f docker-compose.prod.yml up -d
-            echo "🏁"
+      - name: Adding Known Hosts
+          run: ssh-keyscan -H {% raw %}${{ secrets.SSH_HOST }}{% endraw%} >> ~/.ssh/known_hosts
 
-          #   cd ${{ secrets.PROJECT_PATH }}
-          #   git pull origin main
-          #   export NVM_DIR=~/.nvm
-          #   source ~/.nvm/nvm.sh
-          #   echo "🛫 Building application"
-          #   npm install
-          #   npm run build
-          #   cd ..
-          #   echo "ℹ️ Disk space usage"
-          #   df -h
-          #   echo "🔄 Shutdown docker container ..."
-          #   sudo docker-compose -f docker-compose.prod.yml stop
-          #   # echo "🪣 Removing docker containers,images"
-          #   docker container rm $(docker container ls -aq -f "name=auth_service")
-          #   docker rmi -f $(docker images --filter "reference=*echosystem_authentication*" -q)
-          #   echo "🚀 Starting docker container ..."
-          #   sudo docker-compose -f docker-compose.prod.yml up -d
-          #   echo "🏁"
-      # - name: slack - GitHub Actions Slack integration
-      #   uses: act10ns/slack@v1.2.2
-      #   with:
-      #     status: ${{ job.status }}
-      #     steps: ${{ toJson(steps) }}
-      #     channel: github-action-alerts
-      #   if: always()
-      #   env:
-      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+      - name: Deploy with rsync
+        run: rsync -avz ./dist/ {% raw %}${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}{% endraw %}:/home/ahmed/www/auth_service

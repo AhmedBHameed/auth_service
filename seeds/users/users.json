@@ -1,21 +1,22 @@
 [
   {
+    "address": {
+      "city": "Baghdad",
+      "state": "IQ"
+    },
+    "attemptOfResetPassword": 0,
+    "avatar": "",
+    "email": "ahmedbazy@gmail.com",
+    "gender": "male",
+    "id": "01EGXMD8378F5TZ8NGP9J8J3TZ",
+    "isActive": true,
+    "isSuper": true,
     "name": {
       "first": "Ahmed",
       "last": "HAMEED"
     },
-    "email": "ahmedbazy@gmail.com",
-    "passwordSalt": "$2a$12$vaXQMygEB8pzbUTNzlKeBu",
     "password": "$2a$12$vaXQMygEB8pzbUTNzlKeBuFX9v/kby6PhcrFGZ.r4BuRUrdYb7gMm",
-    "avatar": "",
-    "status": "ACTIVE",
-    "gender": "male",
-    "roles": ["KAK_ADMIN"],
-    "verificationId": "01EGXMD8378F5TZ8NGP9J8J3TZ",
-    "attemptOfResetPassword": 0,
-    "address": {
-      "state": "IQ",
-      "city": "Baghdad"
-    }
+    "passwordSalt": "$2a$12$vaXQMygEB8pzbUTNzlKeBu",
+    "verificationId": "01EGXMD8378F5TZ8NMP9J8J3TZ"
   }
 ]

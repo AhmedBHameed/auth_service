@@ -1,0 +1,17 @@
+GET http://localhost:8081/tokens HTTP/1.1
+content-type: application/json
+
+{
+"email": "test",
+"password": "123456"
+}
+
+###
+
+GET http://localhost:8081/tokens HTTP/1.1
+content-type: application/vnd.xentral.email-password.v1+json
+
+{
+    "email": "test",
+    "password": "123456"
+}

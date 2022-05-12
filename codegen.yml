@@ -1,0 +1,13 @@
+schema: http://localhost:5001/graphql
+generates:
+  ./src/graphql/models/resolvers-types.model.ts:
+    config:
+      contextType: ./context.model#Context
+      useIndexSignature: true
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-resolvers
+hooks:
+  afterAllFileWrite:
+    - prettier --write

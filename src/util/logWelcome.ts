@@ -1,17 +1,29 @@
-import environment from 'src/config/environment';
+import {APP_VERSION, IS_PRODUCTION, SERVER_PORT} from 'src/config/environment';
 
 import showIp from './showIp';
 
-const {port, version} = environment;
+const IP = showIp()[0];
 
-const logWelcome = (): void =>
-  console.log(
-    '\n\t🛡️ ###########################🛡️',
-    '\n\n\t Server is listening to:',
-    `\n${showIp()
-      .map(ip => `\n\t 🚀 http://${ip}:${port}`)
-      .join('')}\n\n\t 🔨 Build ver: ${version}`,
-    '\n\n\t🛡️ ###########################🛡️'
+const {log} = console;
+
+const logWelcome = (): void => {
+  log('\n\n🛡️ ############################################🛡️');
+  log('\n\n ℹ️  Server is listening to:\n');
+
+  if (!IS_PRODUCTION) log(`\t 🚀 ${IP}`);
+
+  log(
+    `\t 🔨 Build ver: ${APP_VERSION}`,
+    `\n\t 📳 ${IS_PRODUCTION ? 'Production' : 'Development'} mode`
   );
+
+  log('\n ℹ️  Server end-points:\n');
+  log(`\t ⚙️  http://localhost:${SERVER_PORT}/changelog`);
+  if (!IS_PRODUCTION) {
+    log(`\t ⚙️  http://localhost:${SERVER_PORT}/graphql`);
+  }
+
+  log('\n\n🛡️ ############################################🛡️');
+};
 
 export default logWelcome;

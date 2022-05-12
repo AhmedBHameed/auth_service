@@ -1,0 +1,28 @@
+[
+  {
+    "actions": [
+      {
+        "name": "users",
+        "permissions": [
+          "create:any",
+          "read:any",
+          "update:any",
+          "delete:any",
+          "list:any"
+        ]
+      },
+      {
+        "name": "authorizations",
+        "permissions": [
+          "create:any",
+          "read:any",
+          "update:any",
+          "delete:any",
+          "list:any"
+        ]
+      }
+    ],
+    "id": "01FGJ3Z4AQWQ5G887BX808PB7J",
+    "userId": "01EGXMD8378F5TZ8NGP9J8J3TZ"
+  }
+]

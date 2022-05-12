@@ -1,14 +1,8 @@
-import {Moment} from 'moment';
+import {addMinutes,format} from 'date-fns';
 
-// eslint-disable-next-line
-const moment = require('moment');
+const getUTCTime = (date: Date) => format(
+    addMinutes(date, date.getTimezoneOffset()),
+    "yyyy-MM-dd'T'HH:mm:ss'Z'"
+  );
 
-function utcTime(): Moment {
-  return (moment(new Date()) as Moment).utc();
-}
-
-function getPassedTimeFrom(timestamp: string): number {
-  return moment().diff(timestamp, 'minutes');
-}
-
-export {utcTime, getPassedTimeFrom};
+export {getUTCTime};
