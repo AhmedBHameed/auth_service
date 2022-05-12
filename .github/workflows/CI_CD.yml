@@ -67,4 +67,3 @@ jobs:
 
       - name: Display status from deploy
         run: echo "${{ steps.deploy.outputs.status }}"
-        run: docker-compose restart -d
