@@ -43,6 +43,7 @@ jobs:
           echo MAIL_PORT=${{ secrets.MAIL_PORT }} >> .env
           echo MAIL_USER=${{ secrets.MAIL_USER }} >> .env
           echo PASS_PHRASE=${{ secrets.PASS_PHRASE }} >> .env
+          echo REDIS_PASS=${{ secrets.REDIS_PASS }} >> .env
 
       - run: yarn
       - run: yarn build
