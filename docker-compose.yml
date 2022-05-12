@@ -14,8 +14,8 @@ services:
       dockerfile: ./Dockerfile
     restart: always
     volumes:
-      - ./auth_service/node_modules:/home/node/auth_service/node_modules
-      - ./auth_service:/home/node/auth_service
+      - ./node_modules:/home/node/auth_service/node_modules
+      - ./:/home/node/auth_service
     ports:
       - "5001:5001"
     networks:
