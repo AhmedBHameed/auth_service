@@ -7,6 +7,7 @@ import {
   TokenExpiredError,
   verify,
 } from 'jsonwebtoken';
+import {resolve} from 'path';
 import {Maybe} from 'src/graphql/models';
 import {ulid} from 'ulid';
 
@@ -34,8 +35,8 @@ export interface ParseTokenData {
 
 type SSLKey = string;
 
-const PRIVATE_KEY: SSLKey = readFileSync('keys/private.pem', 'utf8');
-const PUBLIC_KEY: SSLKey = readFileSync('keys/public.pem', 'utf8');
+const PRIVATE_KEY: SSLKey = readFileSync(resolve(`./keys/private.pem`), 'utf8');
+const PUBLIC_KEY: SSLKey = readFileSync(resolve(`./keys/public.pem`), 'utf8');
 
 const getSaltAndHashedPassword = (
   plainPassword: string
