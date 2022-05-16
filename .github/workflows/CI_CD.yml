@@ -69,7 +69,7 @@ jobs:
         with:
           flags: '-avzr --delete'
           options: ''
-          ssh_options: ''
+          ssh_options: '--exclude keys'
           src: '.'
           dest: '${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/ahmed/www/auth_service'
 
