@@ -105,4 +105,4 @@ build
 .tern-port
 
 # Ignore keys files
-keys/*
+keys

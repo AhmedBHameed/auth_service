@@ -8,9 +8,6 @@ const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const APP_DIR = path.resolve(__dirname, './src');
 const BUILD_DIR = path.resolve(__dirname, './build');
 
-
-
-
 function buildConfig(_, argv) {
   const isProd = argv.mode === 'production';
   const BUILD_ENV = isProd ? 'production' : 'development';
