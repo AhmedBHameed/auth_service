@@ -63,7 +63,7 @@ const AUTHENTICATION_TYPES = gql`
   }
 
   #
-  # ######### Update authorization #########
+  # ######### Create/Update authorization #########
   #
   input ActionInput {
     name: RequiredString!

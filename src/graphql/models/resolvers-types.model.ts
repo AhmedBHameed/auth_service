@@ -102,8 +102,8 @@ export type Mutation = {
   mutator?: Maybe<Mutator>;
   resetPassword?: Maybe<Message>;
   signup?: Maybe<Message>;
-  updateAuthorization?: Maybe<Authorization>;
   updateUser?: Maybe<User>;
+  upsertAuthorization?: Maybe<Authorization>;
 };
 
 export type MutationCreateUserArgs = {
@@ -126,12 +126,12 @@ export type MutationSignupArgs = {
   input: SignupInput;
 };
 
-export type MutationUpdateAuthorizationArgs = {
-  input: AuthorizationInput;
-};
-
 export type MutationUpdateUserArgs = {
   input: UpdateUserInput;
+};
+
+export type MutationUpsertAuthorizationArgs = {
+  input: AuthorizationInput;
 };
 
 export type Mutator = {
@@ -649,17 +649,17 @@ export type MutationResolvers<
     ContextType,
     RequireFields<MutationSignupArgs, 'input'>
   >;
-  updateAuthorization?: Resolver<
-    Maybe<ResolversTypes['Authorization']>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationUpdateAuthorizationArgs, 'input'>
-  >;
   updateUser?: Resolver<
     Maybe<ResolversTypes['User']>,
     ParentType,
     ContextType,
     RequireFields<MutationUpdateUserArgs, 'input'>
+  >;
+  upsertAuthorization?: Resolver<
+    Maybe<ResolversTypes['Authorization']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationUpsertAuthorizationArgs, 'input'>
   >;
 }>;
 

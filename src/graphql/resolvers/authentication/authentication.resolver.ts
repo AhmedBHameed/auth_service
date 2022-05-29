@@ -35,13 +35,15 @@ const AuthenticationResolvers: Resolvers = {
   },
   Query: {
     githubLogin: async (_, {code}, {dataSources}) => {
-      const {auth} = dataSources;
+      const {auth,} = dataSources;
 
       const accessToken = await auth.createGithubTokens(code);
 
       const data = await auth.verifyGithubAccessToken(accessToken);
 
       const tokens = await auth.createSocialMediaToken(data);
+
+      // const s = await auth.create
 
       return tokens;
     },
@@ -117,7 +119,7 @@ const AuthenticationResolvers: Resolvers = {
           'If your registered email is valid, you will receive an email shortly.',
       };
     },
-    updateAuthorization: async (_, {input}, {req, dataSources}) => {
+    upsertAuthorization: async (_, {input}, {req, dataSources}) => {
       const {auth} = dataSources;
 
       const accessToken = req.cookies.ACCESS_TOKEN;
@@ -127,7 +129,7 @@ const AuthenticationResolvers: Resolvers = {
         permission: 'update',
       });
 
-      const userAuthorization = await auth.updateAuthorization(input);
+      const userAuthorization = await auth.upsertAuthorization(input);
       return userAuthorization;
     },
   },

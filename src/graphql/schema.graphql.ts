@@ -72,7 +72,7 @@ const typeDefs = gql`
     #
     # ######### User mutation #########
     #
-    updateAuthorization(input: AuthorizationInput!): Authorization
+    upsertAuthorization(input: AuthorizationInput!): Authorization
 
     mutator: Mutator
   }

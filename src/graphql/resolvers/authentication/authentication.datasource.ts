@@ -51,7 +51,7 @@ export default class AuthDataSource extends DataSource<Context> {
     this.isForbiddenUserAccess = this.isForbiddenUserAccess.bind(this);
     this.isAuthorizedUser = this.isAuthorizedUser.bind(this);
     this.getUserAuthorization = this.getUserAuthorization.bind(this);
-    this.updateAuthorization = this.updateAuthorization.bind(this);
+    this.upsertAuthorization = this.upsertAuthorization.bind(this);
     this.unknownError = this.unknownError.bind(this);
     this.forbiddenError = this.forbiddenError.bind(this);
   }
@@ -238,7 +238,7 @@ export default class AuthDataSource extends DataSource<Context> {
     return responseResult;
   }
 
-  async updateAuthorization(input: AuthorizationInput) {
+  async upsertAuthorization(input: AuthorizationInput) {
     const responseResult = await callTryCatch<IAuthorizationModel, Error>(
       async () => {
         const newUserAuthorization =
@@ -323,8 +323,12 @@ export default class AuthDataSource extends DataSource<Context> {
   }
 
   async createSocialMediaToken(githubUserData: GithubUserDataModel) {
-    const responseResult = await callTryCatch<IUserModel | null, Error>(
-      async () =>
+    let user: IUserModel | null | Error;
+
+    user = await UserDbModel.findOne({socialMediaId: githubUserData.id});
+
+    if (!user) {
+      user = await callTryCatch<IUserModel | null, Error>(async () =>
         UserDbModel.findOneAndUpdate(
           {socialMediaId: githubUserData.id},
           {
@@ -346,18 +350,18 @@ export default class AuthDataSource extends DataSource<Context> {
           },
           {upsert: true, new: true}
         )
-    );
+      );
+      if (user instanceof Error) {
+        logger.error(user);
+        throw new AuthenticationError('Database error!');
+      }
 
-    if (responseResult instanceof Error) {
-      logger.error(responseResult);
-      throw new AuthenticationError('Database error!');
+      if (!user) {
+        throw new ApolloError('User not found!');
+      }
     }
 
-    if (!responseResult) {
-      throw new ApolloError('User not found!');
-    }
-
-    const userAccount = responseResult as IUserModel & {
+    const userAccount = user as IUserModel & {
       password: string;
       verificationId: string;
     };
