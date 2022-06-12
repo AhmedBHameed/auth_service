@@ -28,6 +28,7 @@ const UserSchema = new Schema(
     githubUrl: {type: String, default: ''},
     gender: {type: String, default: ''},
     verificationId: {type: String, default: ''},
+    authorizationId: {type: String, required: true},
     attemptOfResetPassword: {type: Number, default: 0},
     address: {
       type: {

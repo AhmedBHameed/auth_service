@@ -16,13 +16,13 @@ const UserResolvers: Resolvers = {
       });
       return usersData[0];
     },
-    authorization: async (parent, _, {req, dataSources}) => {
+    authorization: async (parent, _, {dataSources}) => {
       const {auth} = dataSources;
-      const accessToken = req.cookies.ACCESS_TOKEN;
+      // const accessToken = req.cookies.ACCESS_TOKEN;
 
-      const {data} = await auth.verifyAccessToken(accessToken);
+      // const {data} = await auth.verifyAccessToken(accessToken);
 
-      const userPermission = await auth.getUserAuthorization(data.id);
+      const userPermission = await auth.getUserAuthorization(parent.id);
 
       return userPermission;
     },

@@ -5,11 +5,12 @@ import {counter, histogram} from 'src/services/prometheus.service';
 
 import {IS_PRODUCTION} from '../config/environment';
 import monitorPerformance from './plugins/monitorPerformance.plugin';
-import {AuthenticationDataSource, UserDataSource} from './resolvers';
+import {authDataSource, userDataSource} from './resolvers';
 import schema from './schema.graphql';
 
-const plugins = [monitorPerformance]
-if(!IS_PRODUCTION) plugins.push(ApolloServerPluginLandingPageGraphQLPlayground());
+const plugins = [monitorPerformance];
+if (!IS_PRODUCTION)
+  plugins.push(ApolloServerPluginLandingPageGraphQLPlayground());
 
 const apolloServer = new ApolloServer({
   debug: !IS_PRODUCTION,
@@ -21,8 +22,8 @@ const apolloServer = new ApolloServer({
   },
   plugins,
   dataSources: () => ({
-    user: new UserDataSource(),
-    auth: new AuthenticationDataSource(),
+    user: userDataSource,
+    auth: authDataSource,
   }),
   context: async ({req, res}) => ({req, res, histogram, counter}),
 });

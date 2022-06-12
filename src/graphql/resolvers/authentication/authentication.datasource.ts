@@ -40,7 +40,7 @@ import UserDbModel, {IUserModel} from '../_database/user.model';
 
 const USER_IDENTIFIER_KEY = 'USER';
 
-export default class AuthDataSource extends DataSource<Context> {
+class AuthDataSource extends DataSource<Context> {
   constructor() {
     super();
     this.createTokens = this.createTokens.bind(this);
@@ -328,16 +328,19 @@ export default class AuthDataSource extends DataSource<Context> {
     user = await UserDbModel.findOne({socialMediaId: githubUserData.id});
 
     if (!user) {
+      const userId = ulid();
+      const authorizationId = ulid();
       user = await callTryCatch<IUserModel | null, Error>(async () =>
         UserDbModel.findOneAndUpdate(
           {socialMediaId: githubUserData.id},
           {
-            id: ulid(),
+            id: userId,
             socialMediaId: githubUserData.id,
             email: githubUserData.email,
             name: {
               first: githubUserData.name,
             },
+            authorizationId,
             avatar: githubUserData.avatar_url,
             isActive: true,
             isSuper: false,
@@ -359,6 +362,14 @@ export default class AuthDataSource extends DataSource<Context> {
       if (!user) {
         throw new ApolloError('User not found!');
       }
+
+      const userAuthorization = await AuthorizationDbModel.create({
+        id: authorizationId,
+        userId,
+        actions: [],
+      });
+
+      await userAuthorization.save();
     }
 
     const userAccount = user as IUserModel & {
@@ -391,3 +402,7 @@ export default class AuthDataSource extends DataSource<Context> {
     return new ForbiddenError('Access denied!');
   }
 }
+
+const authDataSource = new AuthDataSource();
+export {AuthDataSource};
+export default authDataSource;

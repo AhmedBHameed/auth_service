@@ -27,6 +27,7 @@ import renderTemplate from 'src/services/renderTemplate.service';
 import {callTryCatch} from 'src/util';
 import {ulid} from 'ulid';
 
+import AuthorizationDbModel from '../_database/authorization.model';
 import UserDbModel, {IUserModel} from '../_database/user.model';
 import DuplicationError from '../_errors/DuplicationError.error';
 import NotFoundError from '../_errors/NotFoundError.error';
@@ -39,7 +40,7 @@ const USER_IDENTIFIER_KEY = 'USER';
 
 // const LIMIT = 20000
 
-export default class UserDataSource extends DataSource {
+class UserDataSource extends DataSource {
   constructor() {
     super();
     //   this.redis = redis
@@ -129,6 +130,9 @@ export default class UserDataSource extends DataSource {
   }
 
   async createUser(input: CreateUserInput) {
+    const userId = ulid();
+    const authorizationId = ulid();
+
     const responseResult = await callTryCatch<IUserModel | null, Error>(
       async () => {
         const {password, passwordSalt} = getSaltAndHashedPassword(
@@ -136,8 +140,9 @@ export default class UserDataSource extends DataSource {
         );
         const newUser = await UserDbModel.create({
           ...input,
-          id: ulid(),
+          id: userId,
           email: input.email.toLowerCase(),
+          authorizationId,
           isSuper: false,
           isActive: false,
           verificationId: ulid(),
@@ -149,6 +154,14 @@ export default class UserDataSource extends DataSource {
           },
           attemptOfResetPassword: 0,
         });
+
+        const userAuthorization = await AuthorizationDbModel.create({
+          id: authorizationId,
+          userId,
+          actions: [],
+        });
+
+        await userAuthorization.save();
 
         const user = await newUser.save();
         return user;
@@ -323,3 +336,7 @@ export default class UserDataSource extends DataSource {
     );
   }
 }
+
+const userDataSource = new UserDataSource();
+export {UserDataSource};
+export default userDataSource;

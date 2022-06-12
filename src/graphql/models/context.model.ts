@@ -1,14 +1,14 @@
 import {Request, Response} from 'express';
 import {Counter, Histogram} from 'prom-client';
 
-import {AuthenticationDataSource, UserDataSource} from '../resolvers';
+import {AuthDataSource, UserDataSource} from '../resolvers';
 
 export type Context = {
   req: Request;
   res: Response;
   dataSources: {
     user: UserDataSource;
-    auth: AuthenticationDataSource;
+    auth: AuthDataSource;
   };
   histogram: Histogram<string>;
   counter: Counter<string>;
