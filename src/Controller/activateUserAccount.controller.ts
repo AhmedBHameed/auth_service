@@ -1,7 +1,8 @@
 import {Request, Response} from 'express';
 import {readFileSync} from 'fs';
 import hbs from 'handlebars';
-import {LOGO_SRC, SERVER_BASE_PATH} from 'src/config/environment';
+
+import {LOGO_SRC, SERVER_BASE_PATH} from '../config/environment';
 
 const activateUserAccountController = (_: Request, res: Response): void => {
   const template = readFileSync('views/activate-user-account.hbs', {

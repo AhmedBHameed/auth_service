@@ -1,14 +1,14 @@
 import {SendMailOptions} from 'nodemailer';
+import {ulid} from 'ulid';
+
 import {
   APP_NAME,
   LOGO_SRC,
   MAIL_USER,
   SERVER_DOMAIN,
-} from 'src/config/environment';
-import {mailingQueue} from 'src/jobs/queues/mailing.queue';
-import renderTemplate from 'src/services/renderTemplate.service';
-import {ulid} from 'ulid';
-
+} from '../../../config/environment';
+import {mailingQueue} from '../../../jobs/queues/mailing.queue';
+import renderTemplate from '../../../services/renderTemplate.service';
 import {Resolvers} from '../../models/resolvers-types.model';
 
 const querierAndMutatorVerifierFun = async (_, __, {req, dataSources}) => {
@@ -16,7 +16,7 @@ const querierAndMutatorVerifierFun = async (_, __, {req, dataSources}) => {
   const accessToken = req.cookies.ACCESS_TOKEN;
   const tokenPayload = await auth.verifyAccessToken(accessToken || '');
 
-  const {id, verificationId, isSuper} = tokenPayload.data;
+  const {id, verificationId, isSuper} = tokenPayload;
 
   await user.checkUserVerificationId(id, verificationId);
   const userAuthorization = await auth.getUserAuthorization(id);
@@ -35,7 +35,7 @@ const AuthenticationResolvers: Resolvers = {
   },
   Query: {
     githubLogin: async (_, {code}, {dataSources}) => {
-      const {auth,} = dataSources;
+      const {auth} = dataSources;
 
       const accessToken = await auth.createGithubTokens(code);
 
@@ -52,7 +52,7 @@ const AuthenticationResolvers: Resolvers = {
       const accessToken = req.cookies.ACCESS_TOKEN;
       const tokenPayload = await auth.verifyAccessToken(accessToken || '');
 
-      const {id} = tokenPayload.data;
+      const {id} = tokenPayload;
 
       const responseResult = await user.getUserById(id);
       return responseResult;
@@ -81,9 +81,9 @@ const AuthenticationResolvers: Resolvers = {
       const {auth} = dataSources;
       const accessToken = req.cookies.ACCESS_TOKEN;
 
-      const {data} = await auth.verifyAccessToken(accessToken);
+      const tokenPayload = await auth.verifyAccessToken(accessToken);
 
-      const userPermission = await auth.getUserAuthorization(data.id);
+      const userPermission = await auth.getUserAuthorization(tokenPayload.id);
 
       return userPermission;
     },

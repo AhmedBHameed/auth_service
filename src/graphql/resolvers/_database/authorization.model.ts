@@ -1,6 +1,7 @@
 import {Document, model, Schema} from 'mongoose';
-import {Authorization, UserAction} from 'src/graphql/models';
-import {getUTCTime} from 'src/util';
+
+import {Authorization, UserAction} from '../../../graphql/models';
+import {getUTCTime} from '../../../util';
 
 export interface IAuthorizationModel
   extends Omit<Authorization & {actions: UserAction[]}, 'id'>,

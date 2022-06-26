@@ -125,8 +125,7 @@ const USER_TYPES = gql`
   # ######### Reset user password ##################
   #
   input ResetPasswordInput {
-    verificationId: ID!
-    userId: ID!
+    hash: String!
     newPassword: Password!
   }
 `;

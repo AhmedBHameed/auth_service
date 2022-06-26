@@ -1,6 +1,7 @@
 import {Document, model, Schema} from 'mongoose';
-import {User} from 'src/graphql/models';
-import {getUTCTime} from 'src/util';
+
+import {User} from '../../../graphql/models';
+import {getUTCTime} from '../../../util';
 
 export interface IUserModel
   extends Omit<User & {verificationId: string}, 'id'>,

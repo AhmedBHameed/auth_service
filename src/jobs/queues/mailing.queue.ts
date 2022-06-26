@@ -1,7 +1,7 @@
 import Queue from 'bull';
-import {logger} from 'src/services';
 
 import {REDIS_HOST, REDIS_PASS, REDIS_PORT} from '../../config/environment';
+import {logger} from '../../services';
 import mailingProcess from '../processes/mailing.process';
 
 // Number of workers.

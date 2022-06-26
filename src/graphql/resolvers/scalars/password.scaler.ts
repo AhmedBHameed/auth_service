@@ -1,6 +1,7 @@
 import {ValidationError} from 'apollo-server-express';
 import {GraphQLScalarType} from 'graphql';
-import {passwordValidator} from 'src/util/validations';
+
+import {passwordValidator} from '../../../util/validations';
 
 const passwordScalar = new GraphQLScalarType({
   name: 'Password',

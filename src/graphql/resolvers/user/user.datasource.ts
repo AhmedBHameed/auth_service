@@ -7,12 +7,14 @@
 import {DataSource} from 'apollo-datasource';
 import {ApolloError, AuthenticationError} from 'apollo-server-core';
 import {SendMailOptions} from 'nodemailer';
+import {ulid} from 'ulid';
+
 import {
   APP_NAME,
   LOGO_SRC,
   MAIL_USER,
   SERVER_DOMAIN,
-} from 'src/config/environment';
+} from '../../../config/environment';
 import {
   CreateUserInput,
   ListUsersCollateInput,
@@ -20,13 +22,16 @@ import {
   ResetPasswordInput,
   UpdateUserInput,
   User,
-} from 'src/graphql/models';
-import {mailingQueue} from 'src/jobs/queues/mailing.queue';
-import {getSaltAndHashedPassword, redisClient} from 'src/services';
-import renderTemplate from 'src/services/renderTemplate.service';
-import {callTryCatch} from 'src/util';
-import {ulid} from 'ulid';
-
+} from '../../../graphql/models';
+import {mailingQueue} from '../../../jobs/queues/mailing.queue';
+import {
+  decodeJwT,
+  encodeJwT,
+  getSaltAndHashedPassword,
+  redisClient,
+} from '../../../services';
+import renderTemplate from '../../../services/renderTemplate.service';
+import {callTryCatch} from '../../../util';
 import AuthorizationDbModel from '../_database/authorization.model';
 import UserDbModel, {IUserModel} from '../_database/user.model';
 import DuplicationError from '../_errors/DuplicationError.error';
@@ -220,17 +225,16 @@ class UserDataSource extends DataSource {
   }
 
   async resetUserPassword(input: ResetPasswordInput) {
+    const result = decodeJwT<{email: string}>(input.hash);
+
     const {password, passwordSalt} = getSaltAndHashedPassword(
       input.newPassword
     );
+
     await UserDbModel.findOneAndUpdate(
-      {
-        verificationId: input.verificationId,
-        id: input.userId,
-      },
+      {email: result.data.email},
       {
         isActive: true,
-        verificationId: ulid(),
         password,
         passwordSalt,
       },
@@ -238,22 +242,15 @@ class UserDataSource extends DataSource {
     );
 
     // TODO: if user exist, send an email to clarification.
-
     return {
       message: 'Done',
     };
   }
 
   async forgotUserPassword(email: string) {
-    const responseResult = await UserDbModel.findOneAndUpdate(
-      {
-        email,
-      },
-      {
-        verificationId: ulid(),
-      },
-      {new: true}
-    );
+    const responseResult = await UserDbModel.findOne({
+      email,
+    });
 
     if (responseResult instanceof Error)
       throw this.unknownError(responseResult);
@@ -262,11 +259,10 @@ class UserDataSource extends DataSource {
 
     await mailingQueue.add(
       {
-        html: renderTemplate('views/activate-user-account.hbs', {
+        html: renderTemplate('views/forgot-your-password.hbs', {
           logoSrc: LOGO_SRC,
           baseUrl: SERVER_DOMAIN,
-          verificationId: responseResult.verificationId,
-          email: responseResult.email,
+          hash: encodeJwT({email: responseResult.email}, {expiresIn: '5m'}),
         }),
         from: MAIL_USER,
         to: email,

@@ -37,8 +37,8 @@ export type Scalars = {
 };
 
 export type ActionInput = {
-  name: Scalars['RequiredString'];
-  permissions: Array<Scalars['RequiredString']>;
+  name?: InputMaybe<Scalars['RequiredString']>;
+  permissions?: InputMaybe<Array<Scalars['RequiredString']>>;
 };
 
 /** Authentication data model */
@@ -206,9 +206,8 @@ export type QueryListUsersArgs = {
 };
 
 export type ResetPasswordInput = {
+  hash: Scalars['String'];
   newPassword: Scalars['Password'];
-  userId: Scalars['ID'];
-  verificationId: Scalars['ID'];
 };
 
 export type SignupInput = {

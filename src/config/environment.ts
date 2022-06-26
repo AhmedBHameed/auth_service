@@ -10,14 +10,14 @@ const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const NODE_ENV = process.env.NODE_ENV;
 const APP_VERSION = process.env.npm_package_version;
 const SERVER_PORT = process.env.SERVER_PORT || 5001;
-const SERVER_DOMAIN = 'http://localhost:5000';
+// Used for mail domain urls
+const SERVER_DOMAIN = IS_PRODUCTION
+  ? 'http://www.rocketdev.dev'
+  : 'http://localhost:5000';
 const SERVER_BASE_PATH = process.env.SERVER_BASE_PATH || '';
-const SERVER_ALLOWED_ORIGIN =
-  process.env.SERVER_ALLOWED_ORIGIN || 'http://localhost:5001';
+const SERVER_ALLOWED_ORIGIN = ['49.12.244.50', 'localhost'];
 const PASS_PHRASE = process.env.PASS_PHRASE || '';
-const LOGO_SRC = `${
-  IS_PRODUCTION ? 'http://wwww.rocketdevs.com' : 'http://localhost:5500'
-}/blog/rocket_devs_logo.png`;
+const LOGO_SRC = 'https://minio.rocketdev.dev/blog/rocketdev.ico';
 
 /**
  * Database configuration

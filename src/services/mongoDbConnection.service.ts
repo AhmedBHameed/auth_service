@@ -1,6 +1,5 @@
 import bluebird from 'bluebird';
 import {connect, Mongoose} from 'mongoose';
-import {callTryCatch} from 'src/util';
 
 import {
   DB_NAME,
@@ -9,6 +8,7 @@ import {
   DB_SERVER,
   DB_USER_NAME,
 } from '../config/environment';
+import {callTryCatch} from '../util';
 import {logger} from './logger.service';
 
 bluebird.promisifyAll(Mongoose);

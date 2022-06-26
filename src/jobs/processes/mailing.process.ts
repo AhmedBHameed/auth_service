@@ -1,5 +1,6 @@
 import {DoneCallback, Job} from 'bull';
-import transporter from 'src/services/emailTransporter.service';
+
+import transporter from '../../services/emailTransporter.service';
 
 const mailingProcess = async (job: Job, done: DoneCallback) => {
   try {

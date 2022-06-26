@@ -4,19 +4,19 @@ import cookieParser from 'cookie-parser';
 import express from 'express';
 import helmet from 'helmet';
 import http from 'http';
-import {SERVER_BASE_PATH, SERVER_PORT} from 'src/config/environment';
-import xss from 'src/middleware/cleanXss.middleware';
-import {connectRedis} from 'src/services';
-import {initLogger} from 'src/services/logger.service';
-import logWelcome from 'src/util/logWelcome';
 
+import {SERVER_BASE_PATH, SERVER_PORT} from './config/environment';
 import activateUserAccountController from './Controller/activateUserAccount.controller';
 import changelogController from './Controller/changelog.controller';
 import apolloServer from './graphql/apolloServer.graphql';
+import xss from './middleware/cleanXss.middleware';
+import {connectRedis} from './services';
+import {initLogger} from './services/logger.service';
 import initDbConnection from './services/mongoDbConnection.service';
 import {client} from './services/prometheus.service';
+import logWelcome from './util/logWelcome';
 
-(async () => {
+async function runServer() {
   initLogger();
 
   await connectRedis();
@@ -58,6 +58,6 @@ import {client} from './services/prometheus.service';
   const httpServer = http.createServer(app);
 
   httpServer.listen(SERVER_PORT, logWelcome);
-})();
+}
 
-export default {};
+runServer();

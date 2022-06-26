@@ -1,9 +1,9 @@
 import {ApolloServerPluginLandingPageGraphQLPlayground} from 'apollo-server-core';
 import {ApolloServer} from 'apollo-server-express';
-import {logger} from 'src/services';
-import {counter, histogram} from 'src/services/prometheus.service';
 
 import {IS_PRODUCTION} from '../config/environment';
+import {logger} from '../services/logger.service';
+import {counter, histogram} from '../services/prometheus.service';
 import monitorPerformance from './plugins/monitorPerformance.plugin';
 import {authDataSource, userDataSource} from './resolvers';
 import schema from './schema.graphql';

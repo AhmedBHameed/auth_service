@@ -10,29 +10,32 @@ import {
   AuthenticationError,
   ForbiddenError,
 } from 'apollo-server-core';
-import {GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET} from 'src/config/environment';
+import {ulid} from 'ulid';
+
+import {
+  GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET,
+} from '../../../config/environment';
 import {
   AuthInput,
   AuthorizationInput,
   Context,
   Maybe,
   UserAction,
-} from 'src/graphql/models';
-import {GithubUserDataModel} from 'src/graphql/models/GithubUserDataModel';
+} from '../../../graphql/models';
+import {GithubUserDataModel} from '../../../graphql/models/GithubUserDataModel';
 import {
   createToken,
+  decodeJwT,
   JsonWebTokenError,
-  ParseTokenData,
+  JWTPayload,
   redisClient,
   TokenExpiredError,
   verifiedPassword,
-  verifyToken,
-} from 'src/services';
-import {httpClient} from 'src/services/httpClient';
-import {logger} from 'src/services/logger.service';
-import {callTryCatch} from 'src/util';
-import {ulid} from 'ulid';
-
+} from '../../../services';
+import {httpClient} from '../../../services/httpClient';
+import {logger} from '../../../services/logger.service';
+import {callTryCatch} from '../../../util';
 import AuthorizationDbModel, {
   IAuthorizationModel,
 } from '../_database/authorization.model';
@@ -121,11 +124,11 @@ class AuthDataSource extends DataSource<Context> {
     return tokens;
   }
 
-  private async _verifyToken(token: string): Promise<ParseTokenData> {
+  private async _verifyToken(token: string): Promise<JWTPayload> {
     const verificationResult = await callTryCatch<
-      ParseTokenData | null,
+      JWTPayload | null,
       TokenExpiredError | JsonWebTokenError
-    >(async () => verifyToken(token));
+    >(async () => decodeJwT<JWTPayload>(token).data);
 
     if (verificationResult instanceof TokenExpiredError)
       throw new AuthenticationError('Unauthorized token! Token expired.');
@@ -137,7 +140,7 @@ class AuthDataSource extends DataSource<Context> {
 
     if (!verificationResult) throw new AuthenticationError('Invalid token!');
 
-    const {id, verificationId} = verificationResult.data;
+    const {id, verificationId} = verificationResult;
     const isForbiddenUser = await this.isForbiddenUserAccess(
       id,
       verificationId
@@ -148,9 +151,9 @@ class AuthDataSource extends DataSource<Context> {
     return verificationResult;
   }
 
-  public async verifyAccessToken(token: string): Promise<ParseTokenData> {
+  public async verifyAccessToken(token: string): Promise<JWTPayload> {
     const payloadResult = await this._verifyToken(token);
-    if (payloadResult.data.isRefreshToken) {
+    if (payloadResult.isRefreshToken) {
       throw new AuthenticationError(
         'Please use access token. Received refresh token instead.'
       );
@@ -158,9 +161,9 @@ class AuthDataSource extends DataSource<Context> {
     return payloadResult;
   }
 
-  public async verifyRefreshToken(token: string): Promise<ParseTokenData> {
+  public async verifyRefreshToken(token: string): Promise<JWTPayload> {
     const payloadResult = await this._verifyToken(token);
-    if (!payloadResult.data.isRefreshToken) {
+    if (!payloadResult.isRefreshToken) {
       throw new AuthenticationError(
         'Please use refresh token. Received access token instead.'
       );
@@ -171,7 +174,7 @@ class AuthDataSource extends DataSource<Context> {
   async refreshTokens(refreshToken: string) {
     const verificationResult = await this.verifyRefreshToken(refreshToken);
 
-    const tokenPayload = verificationResult.data;
+    const tokenPayload = verificationResult;
     const tokens = createToken(tokenPayload, true);
 
     return {payload: tokenPayload, tokens};
@@ -194,9 +197,7 @@ class AuthDataSource extends DataSource<Context> {
     ownedById?: string
   ) {
     const tokenPayload = await this.verifyAccessToken(accessToken || '');
-    const userAuthorization = await this.getUserAuthorization(
-      tokenPayload.data.id
-    );
+    const userAuthorization = await this.getUserAuthorization(tokenPayload.id);
 
     const userPermissions =
       userAuthorization.actions.find(
@@ -211,7 +212,7 @@ class AuthDataSource extends DataSource<Context> {
 
     if (isOwn) {
       //  You can read only your own data.
-      if (tokenPayload.data.id !== ownedById)
+      if (tokenPayload.id !== ownedById)
         throw new ForbiddenError(`Permission denied!`);
 
       return true;

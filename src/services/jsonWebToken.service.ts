@@ -7,11 +7,12 @@ import {
   TokenExpiredError,
   verify,
 } from 'jsonwebtoken';
+import {assignIn} from 'lodash';
 import {resolve} from 'path';
-import {Maybe} from 'src/graphql/models';
 import {ulid} from 'ulid';
 
 import {PASS_PHRASE} from '../config/environment';
+import {Maybe} from '../graphql/models';
 
 /**
  * To Generate private and public keys @see https://rietta.com/blog/openssl-generating-rsa-key-from-command/
@@ -23,20 +24,47 @@ export interface JWTPayload {
   // UserAction[]
   isActive: boolean;
   isSuper: boolean;
+  isRefreshToken: boolean;
 }
 
-export interface ParseTokenData {
+export interface ParseTokenData<T> {
   iat: number;
   exp: number;
   iss: string;
   jti: string;
-  data: JWTPayload & {isRefreshToken: boolean};
+  data: T; // JWTPayload & {isRefreshToken: boolean};
 }
 
 type SSLKey = string;
+type JWT = string;
 
 const PRIVATE_KEY: SSLKey = readFileSync(resolve(`./keys/private.pem`), 'utf8');
 const PUBLIC_KEY: SSLKey = readFileSync(resolve(`./keys/public.pem`), 'utf8');
+
+const encodeJwT = <T extends object>(payload: T, options?: SignOptions) => {
+  const opt = assignIn(
+    {
+      algorithm: 'RS256',
+      jwtid: ulid(),
+      expiresIn: '20m',
+      issuer: 'rocketdev.dev', // (issuer) OPTIONAL You should but domain name here and not the backend system name
+    },
+    options
+  );
+
+  return sign(
+    {
+      data: payload,
+    },
+    {key: PRIVATE_KEY, passphrase: PASS_PHRASE},
+    opt
+  );
+};
+
+const decodeJwT = <T extends object>(hash: JWT): ParseTokenData<T> =>
+  verify(hash, PUBLIC_KEY, {
+    algorithms: ['RS256'],
+  }) as ParseTokenData<T>;
 
 const getSaltAndHashedPassword = (
   plainPassword: string
@@ -58,68 +86,40 @@ const verifiedPassword = (
   hashedPassword: string
 ): boolean => compareSync(myPlaintextPassword, hashedPassword);
 
-const verifyToken = (token: string): ParseTokenData =>
-  verify(token, PUBLIC_KEY, {
-    algorithms: ['RS256'],
-  }) as ParseTokenData;
-
 const createToken = (
-  payload: JWTPayload,
+  payload: Omit<JWTPayload, 'isRefreshToken'>,
   rememberMe: Maybe<boolean>
 ): {
   accessToken: string;
   refreshToken: string;
   accessTokenExpire: number;
   refreshTokenExpire: number;
-} => {
-  const issuer = 'ahmedhameed.dev'; // (issuer) OPTIONAL You should but domain name here and not the backend system name
-  const secretKeys = {key: PRIVATE_KEY, passphrase: PASS_PHRASE};
-  const tokenOptions: SignOptions = {
-    algorithm: 'RS256',
-    jwtid: ulid(),
-    expiresIn: '20m',
-    issuer,
-  };
-
-  return {
-    accessToken: sign(
-      {
-        data: {
-          ...payload,
-          isRefreshToken: false,
-        },
-      },
-      secretKeys,
-      {
-        ...tokenOptions,
-      }
-    ),
-    refreshToken: sign(
-      {
-        data: {
-          ...payload,
-          isRefreshToken: true,
-        },
-      },
-      secretKeys,
-      {
-        ...tokenOptions,
-        expiresIn: '7d',
-        jwtid: ulid(),
-      }
-    ),
-    // accessTokenExpire 15 minutes
-    accessTokenExpire: rememberMe ? 15 * 60 * 1000 : -1,
-    // refreshTokenExpire 7 days
-    refreshTokenExpire: rememberMe ? 24 * 60 * 60 * 1000 * 7 : -1,
-  };
-};
+} => ({
+  accessToken: encodeJwT({
+    ...payload,
+    isRefreshToken: false,
+  }),
+  refreshToken: encodeJwT(
+    {
+      ...payload,
+      isRefreshToken: true,
+    },
+    {
+      expiresIn: '7d',
+    }
+  ),
+  // accessTokenExpire 15 minutes
+  accessTokenExpire: rememberMe ? 15 * 60 * 1000 : -1,
+  // refreshTokenExpire 7 days
+  refreshTokenExpire: rememberMe ? 24 * 60 * 60 * 1000 * 7 : -1,
+});
 
 export {
   createToken,
+  decodeJwT,
+  encodeJwT,
   getSaltAndHashedPassword,
   JsonWebTokenError,
   TokenExpiredError,
   verifiedPassword,
-  verifyToken,
 };

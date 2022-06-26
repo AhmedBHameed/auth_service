@@ -2,7 +2,8 @@ import {GraphQLRequest} from 'apollo-server-core';
 import {DocumentNode} from 'graphql';
 import {IncomingHttpHeaders, IncomingMessage, OutgoingMessage} from 'http';
 import {Socket} from 'net';
-import apolloServer from 'src/graphql/apolloServer.graphql';
+
+import apolloServer from '../graphql/apolloServer.graphql';
 
 const mockApolloServer = (
   request: Omit<GraphQLRequest, 'query'> & {
@@ -27,4 +28,4 @@ const buildContext = (context?: {headers: IncomingHttpHeaders}) => {
   };
 };
 
-export {buildContext,mockApolloServer};
+export {buildContext, mockApolloServer};

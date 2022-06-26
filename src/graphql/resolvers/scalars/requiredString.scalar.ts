@@ -1,6 +1,7 @@
 import {ValidationError} from 'apollo-server-express';
 import {GraphQLScalarType} from 'graphql';
-import {requiredStringValidator} from 'src/util/validations';
+
+import {requiredStringValidator} from '../../../util/validations';
 
 const requiredStringScalar = new GraphQLScalarType({
   name: 'RequiredString',
