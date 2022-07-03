@@ -75,3 +75,14 @@ jobs:
 
       - name: Display status from deploy
         run: echo "${{ steps.deploy.outputs.status }}"
+
+      - name: Rebuild and run docker container
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.PROJECT_PATH }}
+            echo "🔄🛠️🚀 Building project ..."
+            sudo docker-compose -f docker-compose.yml up --build -d

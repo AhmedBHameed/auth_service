@@ -12,18 +12,22 @@ import renderTemplate from '../../../services/renderTemplate.service';
 import {Resolvers} from '../../models/resolvers-types.model';
 
 const querierAndMutatorVerifierFun = async (_, __, {req, dataSources}) => {
-  const {auth, user} = dataSources;
+  const {
+    auth: {verifyAccessToken, getUserAuthorization},
+    user: {checkUserVerificationId},
+  } = dataSources;
   const accessToken = req.cookies.ACCESS_TOKEN;
-  const tokenPayload = await auth.verifyAccessToken(accessToken || '');
+  const tokenPayload = await verifyAccessToken(accessToken || '');
 
   const {id, verificationId, isSuper} = tokenPayload;
 
-  await user.checkUserVerificationId(id, verificationId);
-  const userAuthorization = await auth.getUserAuthorization(id);
+  const userResult = await checkUserVerificationId(id, verificationId);
+  const userAuthorization = await getUserAuthorization(id);
 
   return {
     id,
     verificationId,
+    email: userResult.email,
     userActionsAsJson: JSON.stringify(userAuthorization.actions),
     isSuper,
   };

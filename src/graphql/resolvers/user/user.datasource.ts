@@ -54,6 +54,7 @@ class UserDataSource extends DataSource {
     //     { cacheKeyFn: JSON.stringify }
     //   )
     this.getUserById = this.getUserById.bind(this);
+    this.checkUserVerificationId = this.checkUserVerificationId.bind(this);
     this.invalidateUserToken = this.invalidateUserToken.bind(this);
     this.throwAuthenticationError = this.throwAuthenticationError.bind(this);
     this.unknownError = this.unknownError.bind(this);
@@ -288,6 +289,8 @@ class UserDataSource extends DataSource {
     };
     if (userResult.verificationId !== verificationId)
       this.throwAuthenticationError();
+
+    return userResult;
   }
 
   async invalidateUserToken(userId: string) {

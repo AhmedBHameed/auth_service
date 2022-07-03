@@ -35,7 +35,7 @@ const MAIL_HOST = process.env.MAIL_HOST || '';
 const MAIL_PORT = process.env.MAIL_PORT;
 const MAIL_USER = process.env.MAIL_USER;
 const MAIL_PASS = process.env.MAIL_PASS;
-const APP_NAME = 'Rocket-Devs';
+const APP_NAME = 'Rocket-Dev';
 
 /**
  * Redis configuration
