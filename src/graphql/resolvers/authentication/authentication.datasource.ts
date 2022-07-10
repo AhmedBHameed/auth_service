@@ -27,6 +27,7 @@ import {GithubUserDataModel} from '../../../graphql/models/GithubUserDataModel';
 import {
   createToken,
   decodeJwT,
+  getSaltAndHashedPassword,
   JsonWebTokenError,
   JWTPayload,
   redisClient,
@@ -331,6 +332,8 @@ class AuthDataSource extends DataSource<Context> {
     if (!user) {
       const userId = ulid();
       const authorizationId = ulid();
+      const {password, passwordSalt} = getSaltAndHashedPassword(ulid());
+
       user = await callTryCatch<IUserModel | null, Error>(async () =>
         UserDbModel.findOneAndUpdate(
           {socialMediaId: githubUserData.id},
@@ -341,6 +344,8 @@ class AuthDataSource extends DataSource<Context> {
             name: {
               first: githubUserData.name,
             },
+            password,
+            passwordSalt,
             authorizationId,
             avatar: githubUserData.avatar_url,
             isActive: true,
