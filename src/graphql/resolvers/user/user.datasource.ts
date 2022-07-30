@@ -31,7 +31,7 @@ import {
   redisClient,
 } from '../../../services';
 import renderTemplate from '../../../services/renderTemplate.service';
-import {callTryCatch} from '../../../util';
+import {callTryCatch, getUTCTime} from '../../../util';
 import AuthorizationDbModel from '../_database/authorization.model';
 import UserDbModel, {IUserModel} from '../_database/user.model';
 import DuplicationError from '../_errors/DuplicationError.error';
@@ -185,7 +185,7 @@ class UserDataSource extends DataSource {
     return responseResult as unknown as User & {verificationId: string};
   }
 
-  async updateUser(input: UpdateUserInput) {
+  async updateUser(input: UpdateUserInput & {lastSeenAt?: string}) {
     const responseResult = await callTryCatch<IUserModel | null, Error>(
       async () =>
         UserDbModel.findOneAndUpdate(
@@ -207,20 +207,20 @@ class UserDataSource extends DataSource {
     if (!responseResult) throw new NotFoundError('User not found!');
 
     // ! TODO: Create user has been updated successfully page
-    await mailingQueue.add(
-      {
-        html: `
-          <h1>Your user has been updated successfully</h1>`,
-        from: MAIL_USER,
-        to: responseResult.email,
-        subject: `${APP_NAME} - User has been updated!`,
-      } as SendMailOptions,
-      {
-        jobId: ulid(),
-        delay: 5000,
-        attempts: 2,
-      }
-    );
+    // await mailingQueue.add(
+    //   {
+    //     html: `
+    //       <h1>Your user has been updated successfully</h1>`,
+    //     from: MAIL_USER,
+    //     to: responseResult.email,
+    //     subject: `${APP_NAME} - User has been updated!`,
+    //   } as SendMailOptions,
+    //   {
+    //     jobId: ulid(),
+    //     delay: 5000,
+    //     attempts: 2,
+    //   }
+    // );
 
     return responseResult as User;
   }
@@ -290,6 +290,11 @@ class UserDataSource extends DataSource {
     if (userResult.verificationId !== verificationId)
       this.throwAuthenticationError();
 
+    await this.updateUser({
+      id: userId,
+      lastSeenAt: getUTCTime(new Date()),
+    });
+
     return userResult;
   }
 
@@ -322,7 +327,6 @@ class UserDataSource extends DataSource {
   }
 
   // Errors
-
   throwAuthenticationError(responseResult?: any) {
     throw new AuthenticationError('Unauthenticated call', responseResult);
   }

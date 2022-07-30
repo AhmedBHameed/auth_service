@@ -45,6 +45,7 @@ const UserSchema = new Schema(
     },
     occupation: {type: String, default: ''},
     about: {type: String, default: ''},
+    lastSeenAt: {type: Date}
   },
   {timestamps: true}
 );

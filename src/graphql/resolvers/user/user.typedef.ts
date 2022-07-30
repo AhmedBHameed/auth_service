@@ -39,6 +39,7 @@ const USER_TYPES = gql`
     address: UserAddress
     createdAt: Date
     updatedAt: Date
+    lastSeenAt: Date
   }
 
   #

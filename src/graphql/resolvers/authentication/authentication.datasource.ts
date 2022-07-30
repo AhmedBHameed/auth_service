@@ -36,11 +36,12 @@ import {
 } from '../../../services';
 import {httpClient} from '../../../services/httpClient';
 import {logger} from '../../../services/logger.service';
-import {callTryCatch} from '../../../util';
+import {callTryCatch, getUTCTime} from '../../../util';
 import AuthorizationDbModel, {
   IAuthorizationModel,
 } from '../_database/authorization.model';
 import UserDbModel, {IUserModel} from '../_database/user.model';
+import InvalidRefreshTokenError from '../_errors/InvalidRefreshToken';
 
 const USER_IDENTIFIER_KEY = 'USER';
 
@@ -122,6 +123,17 @@ class AuthDataSource extends DataSource<Context> {
       rememberMe
     );
 
+    await callTryCatch(async () =>
+      UserDbModel.findOneAndUpdate(
+        {
+          id: userAccount.id,
+        },
+        {
+          lastSeenAt: getUTCTime(new Date()),
+        }
+      )
+    );
+
     return tokens;
   }
 
@@ -173,7 +185,12 @@ class AuthDataSource extends DataSource<Context> {
   }
 
   async refreshTokens(refreshToken: string) {
-    const verificationResult = await this.verifyRefreshToken(refreshToken);
+    let verificationResult;
+    try {
+      verificationResult = await this.verifyRefreshToken(refreshToken);
+    } catch {
+      throw new InvalidRefreshTokenError('Invalid or missing refresh token');
+    }
 
     const tokenPayload = verificationResult;
     const tokens = createToken(tokenPayload, true);
@@ -356,6 +373,7 @@ class AuthDataSource extends DataSource<Context> {
             address: {
               state: githubUserData.location,
             },
+            lastSeenAt: getUTCTime(new Date()),
           },
           {upsert: true, new: true}
         )

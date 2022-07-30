@@ -23,15 +23,10 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /** `ISO 8601` date format. E.g: 2021-08-09T09:45:16.696Z */
   Date: any;
-  /** A field whose value conforms to the standard internet email address format as specified in RFC822: https://www.w3.org/Protocols/rfc822/. */
   EmailAddress: any;
-  /** Password scalar custom type */
   Password: any;
-  /** Integers that will have a value greater than 0. */
   PositiveInt: any;
-  /** Required string scalar custom type */
   RequiredString: any;
   _Any: any;
 };
@@ -254,6 +249,7 @@ export type User = {
   id: Scalars['ID'];
   isActive?: Maybe<Scalars['Boolean']>;
   isSuper?: Maybe<Scalars['Boolean']>;
+  lastSeenAt?: Maybe<Scalars['Date']>;
   name?: Maybe<Username>;
   updatedAt?: Maybe<Scalars['Date']>;
 };
@@ -807,6 +803,7 @@ export type UserResolvers<
     ContextType
   >;
   isSuper?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  lastSeenAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['Username']>, ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
