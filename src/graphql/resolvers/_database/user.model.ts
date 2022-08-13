@@ -10,7 +10,12 @@ export interface IUserModel
 const UserSchema = new Schema(
   {
     id: {type: String, required: true, unique: true},
-    name: {type: {first: String, last: String}, default: null},
+    name: {
+      type: {
+        first: {type: String, default: null},
+        last: {type: String, default: null},
+      },
+    },
     email: {type: String, required: true, unique: true},
     passwordSalt: {type: String, required: true, unique: true},
     password: {type: String, required: true},
@@ -45,7 +50,7 @@ const UserSchema = new Schema(
     },
     occupation: {type: String, default: ''},
     about: {type: String, default: ''},
-    lastSeenAt: {type: Date}
+    lastSeenAt: {type: Date},
   },
   {timestamps: true}
 );
