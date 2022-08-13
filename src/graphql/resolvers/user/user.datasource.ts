@@ -31,7 +31,7 @@ import {
   redisClient,
 } from '../../../services';
 import renderTemplate from '../../../services/renderTemplate.service';
-import {callTryCatch, getUTCTime} from '../../../util';
+import {callTryCatch} from '../../../util';
 import AuthorizationDbModel from '../_database/authorization.model';
 import UserDbModel, {IUserModel} from '../_database/user.model';
 import DuplicationError from '../_errors/DuplicationError.error';
@@ -192,10 +192,14 @@ class UserDataSource extends DataSource {
           {id: input.id},
           {
             ...input,
-            name: {
-              first: input.firstName,
-              last: input.lastName,
-            },
+            ...(input.firstName
+              ? {
+                  name: {
+                    first: input.firstName,
+                    last: input.lastName,
+                  },
+                }
+              : {}),
           },
           {new: true}
         )
@@ -289,11 +293,6 @@ class UserDataSource extends DataSource {
     };
     if (userResult.verificationId !== verificationId)
       this.throwAuthenticationError();
-
-    await this.updateUser({
-      id: userId,
-      lastSeenAt: getUTCTime(new Date()),
-    });
 
     return userResult;
   }

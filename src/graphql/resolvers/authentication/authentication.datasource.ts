@@ -134,7 +134,7 @@ class AuthDataSource extends DataSource<Context> {
       )
     );
 
-    return tokens;
+    return {tokens, userDetails: responseResult};
   }
 
   private async _verifyToken(token: string): Promise<JWTPayload> {
@@ -411,7 +411,7 @@ class AuthDataSource extends DataSource<Context> {
       true
     );
 
-    return tokens;
+    return {tokens, userDetails: user as IUserModel};
   }
 
   unknownError(responseResult?: any) {

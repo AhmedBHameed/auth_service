@@ -1,4 +1,5 @@
 import {SendMailOptions} from 'nodemailer';
+import {getUTCTime} from 'src/util';
 import {ulid} from 'ulid';
 
 import {
@@ -39,15 +40,18 @@ const AuthenticationResolvers: Resolvers = {
   },
   Query: {
     githubLogin: async (_, {code}, {dataSources}) => {
-      const {auth} = dataSources;
+      const {auth, user} = dataSources;
 
       const accessToken = await auth.createGithubTokens(code);
 
       const data = await auth.verifyGithubAccessToken(accessToken);
 
-      const tokens = await auth.createSocialMediaToken(data);
+      const {tokens, userDetails} = await auth.createSocialMediaToken(data);
 
-      // const s = await auth.create
+      await user.updateUser({
+        id: userDetails.id,
+        lastSeenAt: getUTCTime(new Date()),
+      });
 
       return tokens;
     },
@@ -62,9 +66,19 @@ const AuthenticationResolvers: Resolvers = {
       return responseResult;
     },
     createTokens: async (_, {input}, {dataSources}) => {
-      const {createTokens} = dataSources.auth;
+      const {
+        auth: {createTokens},
+        user,
+      } = dataSources;
+
       const {rememberMe, ...reset} = input;
-      const tokens = await createTokens(reset, rememberMe);
+      const {tokens, userDetails} = await createTokens(reset, rememberMe);
+
+      await user.updateUser({
+        id: userDetails.id,
+        lastSeenAt: getUTCTime(new Date()),
+      });
+
       return tokens;
     },
     querier: querierAndMutatorVerifierFun,
@@ -75,6 +89,11 @@ const AuthenticationResolvers: Resolvers = {
       const {tokens, payload} = await auth.refreshTokens(refreshToken);
 
       await user.checkUserVerificationId(payload.id, payload.verificationId);
+
+      await user.updateUser({
+        id: payload.id,
+        lastSeenAt: getUTCTime(new Date()),
+      });
 
       return tokens;
     },
