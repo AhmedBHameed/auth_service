@@ -32,7 +32,7 @@ import {
   JWTPayload,
   redisClient,
   TokenExpiredError,
-  verifiedPassword,
+  verifyPassword,
 } from '../../../services';
 import {httpClient} from '../../../services/httpClient';
 import {logger} from '../../../services/logger.service';
@@ -87,7 +87,7 @@ class AuthDataSource extends DataSource<Context> {
       verificationId: string;
     };
 
-    const isValidPassword = verifiedPassword(
+    const isValidPassword = verifyPassword(
       input.password || '',
       userAccount.password || ''
     );

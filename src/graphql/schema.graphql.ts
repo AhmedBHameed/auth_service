@@ -45,7 +45,7 @@ const typeDefs = gql`
     # ######### Permissions queries #########
     #
     getUserAuthorization(id: ID!): Authorization
-    listUsers(input: ListUsersCollateInput): [User]
+    listUsers(query: String): [User]
 
     querier: Querier
   }

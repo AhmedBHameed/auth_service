@@ -81,7 +81,7 @@ const getSaltAndHashedPassword = (
  * @param myPlaintextPassword // Password need to be checked
  * @param hashedPassword // Stored hash when account created.
  */
-const verifiedPassword = (
+const verifyPassword = (
   myPlaintextPassword: string,
   hashedPassword: string
 ): boolean => compareSync(myPlaintextPassword, hashedPassword);
@@ -121,5 +121,5 @@ export {
   getSaltAndHashedPassword,
   JsonWebTokenError,
   TokenExpiredError,
-  verifiedPassword,
+  verifyPassword,
 };

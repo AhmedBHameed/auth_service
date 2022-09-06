@@ -73,16 +73,6 @@ export type CreateUserInput = {
   password: Scalars['Password'];
 };
 
-/**
- * Input configuration to gather or arrange a list in their proper sequence. You can set filtering,sorting,paginating arguments for more specification.
- * This configuration applied on queries with a prefixed name of `list*`
- */
-export type ListUsersCollateInput = {
-  filter?: InputMaybe<UsersFilterInput>;
-  page?: InputMaybe<PaginationInput>;
-  sort?: InputMaybe<SortingByFieldInput>;
-};
-
 export type Message = {
   __typename?: 'Message';
   message?: Maybe<Scalars['String']>;
@@ -197,7 +187,7 @@ export type QueryGithubLoginArgs = {
 };
 
 export type QueryListUsersArgs = {
-  input?: InputMaybe<ListUsersCollateInput>;
+  query?: InputMaybe<Scalars['String']>;
 };
 
 export type ResetPasswordInput = {
@@ -433,7 +423,6 @@ export type ResolversTypes = ResolversObject<{
   EmailAddress: ResolverTypeWrapper<Scalars['EmailAddress']>;
   ID: ResolverTypeWrapper<Scalars['ID']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
-  ListUsersCollateInput: ListUsersCollateInput;
   Message: ResolverTypeWrapper<Message>;
   Mutation: ResolverTypeWrapper<{}>;
   Mutator: ResolverTypeWrapper<Mutator>;
@@ -476,7 +465,6 @@ export type ResolversParentTypes = ResolversObject<{
   EmailAddress: Scalars['EmailAddress'];
   ID: Scalars['ID'];
   Int: Scalars['Int'];
-  ListUsersCollateInput: ListUsersCollateInput;
   Message: Message;
   Mutation: {};
   Mutator: Mutator;

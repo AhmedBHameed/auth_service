@@ -9,18 +9,13 @@ const UserResolvers: Resolvers = {
   User: {
     __resolveReference: async (parent, {dataSources}) => {
       const {user} = dataSources;
-      const usersData = await user.listUsers({
-        filter: {
-          id: [parent.id],
-        },
-      });
+      const usersData = await user.listUsers(
+        encodeURIComponent(`$filter=id eq '${parent.id}'`)
+      );
       return usersData[0];
     },
     authorization: async (parent, _, {dataSources}) => {
       const {auth} = dataSources;
-      // const accessToken = req.cookies.ACCESS_TOKEN;
-
-      // const {data} = await auth.verifyAccessToken(accessToken);
 
       const userPermission = await auth.getUserAuthorization(parent.id);
 
@@ -43,7 +38,7 @@ const UserResolvers: Resolvers = {
 
       return usersData;
     },
-    listUsers: async (_, {input}, {req, dataSources}) => {
+    listUsers: async (_, {query}, {req, dataSources}) => {
       const {auth, user} = dataSources;
 
       const accessToken = req.cookies.ACCESS_TOKEN;
@@ -53,7 +48,7 @@ const UserResolvers: Resolvers = {
         permission: 'list',
       });
 
-      const usersData = await user.listUsers(input);
+      const usersData = await user.listUsers(query);
       return usersData;
     },
   },

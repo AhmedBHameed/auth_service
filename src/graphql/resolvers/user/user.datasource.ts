@@ -7,6 +7,10 @@
 import {DataSource} from 'apollo-datasource';
 import {ApolloError, AuthenticationError} from 'apollo-server-core';
 import {SendMailOptions} from 'nodemailer';
+/**
+ * @see https://www.npmjs.com/package/@wandererin/odata-v4-mongodb
+ */
+import {createQuery} from 'odata-v4-mongodb';
 import {ulid} from 'ulid';
 
 import {
@@ -17,8 +21,7 @@ import {
 } from '../../../config/environment';
 import {
   CreateUserInput,
-  ListUsersCollateInput,
-  Maybe,
+  InputMaybe,
   ResetPasswordInput,
   UpdateUserInput,
   User,
@@ -75,36 +78,17 @@ class UserDataSource extends DataSource {
     return responseResult as unknown as User & {verificationId: string};
   }
 
-  async listUsers(input?: Maybe<ListUsersCollateInput>) {
-    // const page = value.page || 1;
-    //   const perPage = value.perPage || 20;
-
-    let pageNumber = 1;
-    let pageSize = 50;
-    let filterConfig: any;
-    let sortConfig: any;
-
-    if (input?.page) {
-      if (!pageNumber || pageNumber < 1) pageNumber = 1;
-      if (!pageSize || pageSize > 50) pageSize = 50;
-    }
-
-    if (input?.filter) {
-      const filterJson = JSON.stringify(input.filter).replace(/_/g, '$');
-      filterConfig = JSON.parse(filterJson);
-    }
-
-    if (input?.sort) {
-      sortConfig = input.sort;
-    }
+  async listUsers(query?: InputMaybe<string>) {
+    const q = createQuery(
+      query ? decodeURIComponent(query) : '$skip=0&$top=10'
+    );
 
     const responseResult = await callTryCatch<IUserModel[], Error>(async () =>
-      UserDbModel.find(filterConfig)
-        .sort(sortConfig)
-        .skip(pageSize * (pageNumber - 1))
-        .limit(pageSize * pageNumber)
+      UserDbModel.find(q.query)
+        .sort(q.sort)
+        .skip(q.skip)
+        .limit(q.limit)
         .select(['-password', '-passwordSalt'])
-        .exec()
     );
 
     if (responseResult instanceof Error) {

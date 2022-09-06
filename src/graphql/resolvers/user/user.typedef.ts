@@ -91,16 +91,6 @@ const USER_TYPES = gql`
     updatedAt: SortingEnum
   }
 
-  """
-  Input configuration to gather or arrange a list in their proper sequence. You can set filtering,sorting,paginating arguments for more specification.
-  This configuration applied on queries with a prefixed name of \`list*\`
-  """
-  input ListUsersCollateInput {
-    filter: UsersFilterInput
-    sort: SortingByFieldInput
-    page: PaginationInput
-  }
-
   #
   # ######### Create user ##################
   #
