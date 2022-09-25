@@ -9,6 +9,7 @@ import {
   ApolloError,
   AuthenticationError,
   ForbiddenError,
+  UserInputError,
 } from 'apollo-server-core';
 import {ulid} from 'ulid';
 
@@ -23,7 +24,10 @@ import {
   Maybe,
   UserAction,
 } from '../../../graphql/models';
-import {GithubUserDataModel} from '../../../graphql/models/GithubUserDataModel';
+import {
+  GithubUserDataModel,
+  GithubUserEmailDataModel,
+} from '../../../graphql/models/GithubUserDataModel';
 import {
   createToken,
   decodeJwT,
@@ -326,16 +330,37 @@ class AuthDataSource extends DataSource<Context> {
   }
 
   async verifyGithubAccessToken(githubToken: string) {
-    const endpoint = `https://api.github.com/user`;
+    const githubApiDomain = 'https://api.github.com';
+
+    let githubUserData: GithubUserDataModel;
+    try {
+      const result = await httpClient.post(
+        `${githubApiDomain}/user`,
+        undefined,
+        {
+          headers: {
+            Authorization: `bearer ${githubToken}`,
+          },
+        }
+      );
+
+      githubUserData = result.data as GithubUserDataModel;
+    } catch (error) {
+      throw new AuthenticationError((error as any).response?.data?.message);
+    }
 
     try {
-      const result = await httpClient.post(endpoint, undefined, {
+      const result = await httpClient.get(`${githubApiDomain}/user/emails`, {
         headers: {
           Authorization: `bearer ${githubToken}`,
         },
       });
 
-      return result.data as GithubUserDataModel;
+      const primaryEmail = (result.data as GithubUserEmailDataModel[]).filter(
+        (email) => email.primary
+      );
+      githubUserData.email = primaryEmail[0].email;
+      return githubUserData;
     } catch (error) {
       throw new AuthenticationError((error as any).response?.data?.message);
     }
@@ -345,6 +370,9 @@ class AuthDataSource extends DataSource<Context> {
     let user: IUserModel | null | Error;
 
     user = await UserDbModel.findOne({socialMediaId: githubUserData.id});
+
+    if (!githubUserData.email)
+      throw new UserInputError('Github email not found or might be hidden!');
 
     if (!user) {
       const userId = ulid();
@@ -378,13 +406,10 @@ class AuthDataSource extends DataSource<Context> {
           {upsert: true, new: true}
         )
       );
+
       if (user instanceof Error) {
         logger.error(user);
         throw new AuthenticationError('Database error!');
-      }
-
-      if (!user) {
-        throw new ApolloError('User not found!');
       }
 
       const userAuthorization = await AuthorizationDbModel.create({

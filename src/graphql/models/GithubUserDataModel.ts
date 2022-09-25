@@ -13,7 +13,7 @@ export interface GithubUserDataModel {
   company: string;
   created_at: string;
   disk_usage: number;
-  email: string;
+  email?: string;
   events_url: string;
   followers: number;
   followers_url: string;
@@ -45,4 +45,11 @@ export interface GithubUserDataModel {
   type: string;
   updated_at: string;
   url: string;
+}
+
+export interface GithubUserEmailDataModel {
+  email: string;
+  primary: boolean;
+  verified: boolean;
+  visibility: string;
 }
