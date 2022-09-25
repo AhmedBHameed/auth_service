@@ -107,6 +107,7 @@ const USER_TYPES = gql`
   #
   input UpdateUserInput {
     id: ID!
+    email: EmailAddress
     avatar: String
     firstName: String
     lastName: String
