@@ -1,3 +1,4 @@
+import {encodeJwT} from 'src/services';
 import {ulid} from 'ulid';
 
 import {MAIL_USER, SERVER_DOMAIN} from '../../../config/environment';
@@ -81,8 +82,7 @@ const UserResolvers: Resolvers = {
         {
           html: renderTemplate('views/activate-user-account.hbs', {
             baseUrl: SERVER_DOMAIN,
-            verificationId: newUserResult.verificationId,
-            email: newUserResult.email,
+            hash: encodeJwT({email: newUserResult.email}, {expiresIn: '30m'}),
           }),
           from: MAIL_USER,
           to: input.email,
@@ -108,6 +108,18 @@ const UserResolvers: Resolvers = {
 
       const updateResult = await user.updateUser(input);
       return updateResult;
+    },
+    deleteUser: async (_, {id}, {req, dataSources}) => {
+      const {auth, user} = dataSources;
+      const accessToken = req.cookies.ACCESS_TOKEN;
+
+      await auth.isAuthorizedUser(accessToken, {
+        modelName: 'users',
+        permission: 'delete',
+      });
+
+      await user.deleteUser(id);
+      return {message: 'USer account has been deleted successfully'};
     },
     forgotPassword: async (_, {email}, {dataSources}) => {
       const {user} = dataSources;

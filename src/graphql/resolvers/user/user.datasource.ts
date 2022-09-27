@@ -101,7 +101,9 @@ class UserDataSource extends DataSource {
   async deleteUser(id: string) {
     const responseResult = await callTryCatch<IUserModel | null, Error>(
       async () =>
-        UserDbModel.findByIdAndDelete(id).select([
+        UserDbModel.findOneAndDelete({
+          id,
+        }).select([
           '-password',
           '-passwordSalt',
           '-attemptOfResetPassword',
@@ -167,6 +169,24 @@ class UserDataSource extends DataSource {
     }
 
     return responseResult as unknown as User & {verificationId: string};
+  }
+
+  async activateUserAccount(email: string) {
+    const responseResult = await callTryCatch<IUserModel | null, Error>(
+      async () =>
+        UserDbModel.findOneAndUpdate(
+          {email},
+          {
+            isActive: true,
+          },
+          {new: true}
+        )
+    );
+
+    if (responseResult instanceof Error)
+      throw this.unknownError(responseResult);
+
+    return responseResult as IUserModel;
   }
 
   async updateUser(input: UpdateUserInput & {lastSeenAt?: string}) {

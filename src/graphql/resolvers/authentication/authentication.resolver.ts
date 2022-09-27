@@ -1,4 +1,5 @@
 import {SendMailOptions} from 'nodemailer';
+import {encodeJwT} from 'src/services';
 import {getUTCTime} from 'src/util';
 import {ulid} from 'ulid';
 
@@ -123,8 +124,7 @@ const AuthenticationResolvers: Resolvers = {
           html: renderTemplate('views/activate-user-account.hbs', {
             logoSrc: LOGO_SRC,
             baseUrl: SERVER_DOMAIN,
-            verificationId: newUserResult.verificationId,
-            email: newUserResult.email,
+            hash: encodeJwT({email: newUserResult.email}, {expiresIn: '30m'}),
           }),
           from: MAIL_USER,
           to: input.email,
@@ -141,6 +141,15 @@ const AuthenticationResolvers: Resolvers = {
         message:
           'If your registered email is valid, you will receive an email shortly.',
       };
+    },
+    activateUserAccount: async (_, {hash}, {dataSources}) => {
+      const {user, auth} = dataSources;
+
+      const payloadResult = await auth.verifyUserAccountActivationToken(hash);
+
+      await user.activateUserAccount(payloadResult.email);
+
+      return {message: 'User account has been activated!'};
     },
     upsertAuthorization: async (_, {input}, {req, dataSources}) => {
       const {auth} = dataSources;

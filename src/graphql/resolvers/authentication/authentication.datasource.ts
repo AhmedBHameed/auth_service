@@ -141,7 +141,7 @@ class AuthDataSource extends DataSource<Context> {
     return {tokens, userDetails: responseResult};
   }
 
-  private async _verifyToken(token: string): Promise<JWTPayload> {
+  private async _verifyToken<T>(token: string): Promise<T> {
     const verificationResult = await callTryCatch<
       JWTPayload | null,
       TokenExpiredError | JsonWebTokenError
@@ -165,11 +165,19 @@ class AuthDataSource extends DataSource<Context> {
 
     if (isForbiddenUser) throw this.forbiddenError();
 
-    return verificationResult;
+    return verificationResult as T;
+  }
+
+  public async verifyUserAccountActivationToken(
+    token: string
+  ): Promise<{email: string}> {
+    const payloadResult = await this._verifyToken<{email: string}>(token);
+
+    return payloadResult;
   }
 
   public async verifyAccessToken(token: string): Promise<JWTPayload> {
-    const payloadResult = await this._verifyToken(token);
+    const payloadResult = await this._verifyToken<JWTPayload>(token);
     if (payloadResult.isRefreshToken) {
       throw new AuthenticationError(
         'Please use access token. Received refresh token instead.'
@@ -179,7 +187,7 @@ class AuthDataSource extends DataSource<Context> {
   }
 
   public async verifyRefreshToken(token: string): Promise<JWTPayload> {
-    const payloadResult = await this._verifyToken(token);
+    const payloadResult = await this._verifyToken<JWTPayload>(token);
     if (!payloadResult.isRefreshToken) {
       throw new AuthenticationError(
         'Please use refresh token. Received access token instead.'

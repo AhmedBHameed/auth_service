@@ -80,9 +80,10 @@ export type Message = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  activateUserAccount?: Maybe<Message>;
   createUser?: Maybe<User>;
+  deleteUser?: Maybe<Message>;
   forgotPassword?: Maybe<Message>;
-  /** Set user access to forbidden. User in this case should reset their password to reactivate and change password. */
   invalidateUserToken?: Maybe<Message>;
   mutator?: Maybe<Mutator>;
   resetPassword?: Maybe<Message>;
@@ -91,8 +92,16 @@ export type Mutation = {
   upsertAuthorization?: Maybe<Authorization>;
 };
 
+export type MutationActivateUserAccountArgs = {
+  hash: Scalars['String'];
+};
+
 export type MutationCreateUserArgs = {
   input: CreateUserInput;
+};
+
+export type MutationDeleteUserArgs = {
+  id: Scalars['ID'];
 };
 
 export type MutationForgotPasswordArgs = {
@@ -220,6 +229,7 @@ export enum SortingEnum {
 
 export type UpdateUserInput = {
   avatar?: InputMaybe<Scalars['String']>;
+  email?: InputMaybe<Scalars['EmailAddress']>;
   firstName?: InputMaybe<Scalars['String']>;
   id: Scalars['ID'];
   lastName?: InputMaybe<Scalars['String']>;
@@ -601,11 +611,23 @@ export type MutationResolvers<
   ContextType = Context,
   ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']
 > = ResolversObject<{
+  activateUserAccount?: Resolver<
+    Maybe<ResolversTypes['Message']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationActivateUserAccountArgs, 'hash'>
+  >;
   createUser?: Resolver<
     Maybe<ResolversTypes['User']>,
     ParentType,
     ContextType,
     RequireFields<MutationCreateUserArgs, 'input'>
+  >;
+  deleteUser?: Resolver<
+    Maybe<ResolversTypes['Message']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationDeleteUserArgs, 'id'>
   >;
   forgotPassword?: Resolver<
     Maybe<ResolversTypes['Message']>,

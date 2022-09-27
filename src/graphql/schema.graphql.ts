@@ -52,21 +52,13 @@ const typeDefs = gql`
 
   # MUTATIONS
   extend type Mutation {
-    #
-    # ######### Authentication mutation #########
-    #
     signup(input: SignupInput!): Message
-
-    #
-    # ######### User mutation #########
-    #
     createUser(input: CreateUserInput!): User
     updateUser(input: UpdateUserInput!): User
+    deleteUser(id: ID!): Message
     forgotPassword(email: EmailAddress!): Message
     resetPassword(input: ResetPasswordInput!): Message
-    """
-    Set user access to forbidden. User in this case should reset their password to reactivate and change password.
-    """
+    activateUserAccount(hash: String!): Message
     invalidateUserToken(userId: ID!): Message
 
     #
